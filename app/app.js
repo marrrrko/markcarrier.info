@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
+import * as actions from './state/actions'
 
 //Components
 import MarkNav from './containers/nav'
@@ -18,7 +19,7 @@ import { createMuiTheme } from '@material-ui/core/styles'
 
 import store from './state/store'
 
-const unsubscribe = store.subscribe(() => console.log(store.getState()))
+//const unsubscribe = store.subscribe(() => console.log(store.getState()))
 
 const useStyles = makeStyles(theme => ({
     mainContainer: {
@@ -69,3 +70,5 @@ ReactDOM.render(
     </Provider>,
     document.getElementById('root')
 );
+
+store.dispatch(actions.fetchProfile())

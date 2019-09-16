@@ -1,6 +1,8 @@
 import markReducer from './reducers'
-import { createStore } from 'redux'
+import { createStore, applyMiddleware } from 'redux'
+import thunk from 'redux-thunk'
+import { logger } from 'redux-logger'
 
-let store = createStore(markReducer)
+let store = createStore(markReducer, applyMiddleware(thunk, logger))
 
 export default store

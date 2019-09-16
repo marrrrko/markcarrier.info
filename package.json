@@ -12,8 +12,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm-run-all --parallel watch:server watch:build",
-    "watch:build"  : "webpack --watch",
-    "watch:server" : "nodemon \"server.js\"",
+    "watch:build": "webpack --watch",
+    "watch:server": "nodemon \"server.js\"",
     "dev": "webpack-dev-server --open",
     "build": "webpack"
   },
@@ -43,6 +43,8 @@
     "react-dom": "^16.9.0",
     "react-redux": "^7.1.1",
     "redux": "^4.0.4",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
     "typeface-roboto": "0.0.75"
   },
   "devDependencies": {
