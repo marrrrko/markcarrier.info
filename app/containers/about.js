@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
-import MarkBulb from '../components/bulb'
+import About from '../components/about'
 
 const mapStateToProps = function(state) {
     return {
-        light: state.lightsOn
+        about: state.profile && state.profile.about
     }
 }
-    
+
 export default withRouter(connect(
     mapStateToProps
-)(MarkBulb))
+)(About))

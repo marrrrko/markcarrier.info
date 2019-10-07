@@ -3,7 +3,10 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import * as actions from './state/actions'
 
+import { BrowserRouter, Switch, Route, Link } from "react-router-dom"
+
 //Components
+import About from './containers/about'
 import MarkNav from './containers/nav'
 import MarkBulb from './containers/bulb'
 
@@ -18,6 +21,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { createMuiTheme } from '@material-ui/core/styles'
 
 import store from './state/store'
+import { Typography } from '@material-ui/core';
 
 //const unsubscribe = store.subscribe(() => console.log(store.getState()))
 
@@ -47,19 +51,46 @@ function App(props) {
     const classes = useStyles();
 
     return (
-        <>
-            <MarkNav />
-            <Container className={classes.mainContainer}>
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Paper className={classes.paper}>
-                            <MarkBulb />
-                        </Paper>
+        <BrowserRouter>
+            <div>
+                <MarkNav />
+                <br />                
+                <Container className={classes.mainContainer}>            
+                    <Grid container>
+                        <Grid item xs={12}>
+                        <Switch>
+                            <Route exact path="/">
+                                <Home />
+                            </Route>
+                            <Route path="/about/" component={About} />                        
+                            <Route path="/experience">
+                                <Paper>Experience <br />Experience <br />Experience <br />Experience <br />Experience <br /></Paper>
+                            </Route>
+                            <Route path="/education">
+                                <Paper>Education <br />Education <br />Education <br />Education <br />Education <br /></Paper>
+                            </Route>
+                            <Route>
+                                <NoMatch />
+                            </Route>
+                        </Switch>      
                     </Grid>
                 </Grid>
-            </Container>
-        </>
+            </Container>          
+            </div>
+        </BrowserRouter>
     )
+}
+
+function Home() {
+    const classes = useStyles();
+    return (
+        <Paper className={classes.paper}>
+            <MarkBulb />
+        </Paper>)
+}
+
+function NoMatch() {
+    return (<Paper>404 Not Found</Paper>)
 }
 
 ReactDOM.render(

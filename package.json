@@ -33,23 +33,25 @@
   },
   "homepage": "https://github.com/MarkCarrier/markcarrier.info#readme",
   "dependencies": {
-    "@material-ui/core": "^4.4.1",
-    "@material-ui/icons": "^4.4.1",
-    "koa": "^2.8.1",
+    "@material-ui/core": "^4.5.0",
+    "@material-ui/icons": "^4.4.3",
+    "@material-ui/lab": "^4.0.0-alpha.28",
+    "koa": "^2.8.2",
     "koa-mount": "^4.0.0",
     "koa-send": "^5.0.0",
     "koa-static": "^5.0.0",
-    "react": "^16.9.0",
-    "react-dom": "^16.9.0",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
     "react-redux": "^7.1.1",
+    "react-router-dom": "^5.1.2",
     "redux": "^4.0.4",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
     "typeface-roboto": "0.0.75"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.0",
-    "@babel/preset-env": "^7.6.0",
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.6",
     "css-loader": "^3.2.0",
@@ -57,9 +59,9 @@
     "html-webpack-plugin": "^3.2.0",
     "npm-run-all": "^4.1.5",
     "style-loader": "^1.0.0",
-    "url-loader": "^2.1.0",
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.8",
-    "webpack-dev-server": "^3.8.0"
+    "url-loader": "^2.2.0",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2"
   }
 }

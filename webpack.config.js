@@ -6,7 +6,8 @@ module.exports = {
     entry: "./app/app.js",
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: "mark_app.js"
+        filename: "mark_app.js",
+        publicPath: "/"
     },
     devServer: {
         contentBase: './dist'
