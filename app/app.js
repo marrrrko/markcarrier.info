@@ -5,29 +5,32 @@ import * as actions from './state/actions'
 
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom"
 
-//Components
+//Components & Containers
 import About from './containers/about'
+import Experience from './containers/experience'
+import Education from './containers/education'
 import MarkNav from './containers/nav'
 import MarkBulb from './containers/bulb'
 
 import Grid from '@material-ui/core/Grid'
 import Container from '@material-ui/core/Container'
 import Paper from '@material-ui/core/Paper'
+import Box from '@material-ui/core/Box'
 
 //Theming & Styles
 import "./mark.css"
-import ThemeProvider from '@material-ui/styles/ThemeProvider'
+
 import { makeStyles } from '@material-ui/core/styles'
-import { createMuiTheme } from '@material-ui/core/styles'
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
 import store from './state/store'
-import { Typography } from '@material-ui/core';
 
 //const unsubscribe = store.subscribe(() => console.log(store.getState()))
 
 const useStyles = makeStyles(theme => ({
     mainContainer: {
-        marginTop: theme.spacing(4)
+        marginTop: theme.spacing(4),
+        marginBottom: theme.spacing(8)
     },
     paper: {
       padding: theme.spacing(2),
@@ -37,6 +40,34 @@ const useStyles = makeStyles(theme => ({
   }));
 
 const theme = createMuiTheme({
+    typography: {
+        fontFamily: "\"Roboto\", \"Helvetica\", \"Arial\", sans-serif",
+        h1: {
+            fontSize: "4.5rem",
+            fontWeight: 150
+        },
+        h2: {
+            fontSize: "2rem",
+            fontWeight: 400
+        },
+        h3: {
+            fontSize: "2rem",
+            fontWeight: 150
+        },
+        h4: {
+            fontSize: "1.5rem",
+            fontWeight: 400
+        },
+        h5: {
+            fontSize: "1.5rem",
+            fontWeight: 100
+        },
+        h6: {
+            fontSize: "1rem",
+            fontWeight: 400
+        },
+        useNextVariants: true,
+    },
     palette: {
         primary: {
             main: '#fbc02d',
@@ -51,33 +82,40 @@ function App(props) {
     const classes = useStyles();
 
     return (
-        <BrowserRouter>
-            <div>
-                <MarkNav />
-                <br />                
-                <Container className={classes.mainContainer}>            
-                    <Grid container>
-                        <Grid item xs={12}>
-                        <Switch>
-                            <Route exact path="/">
-                                <Home />
-                            </Route>
-                            <Route path="/about/" component={About} />                        
-                            <Route path="/experience">
-                                <Paper>Experience <br />Experience <br />Experience <br />Experience <br />Experience <br /></Paper>
-                            </Route>
-                            <Route path="/education">
-                                <Paper>Education <br />Education <br />Education <br />Education <br />Education <br /></Paper>
-                            </Route>
-                            <Route>
-                                <NoMatch />
-                            </Route>
-                        </Switch>      
-                    </Grid>
-                </Grid>
-            </Container>          
-            </div>
-        </BrowserRouter>
+        <Provider store={store}>
+            <MuiThemeProvider theme={theme}>
+                <BrowserRouter>
+                    <Box>
+                        <MarkNav />
+                        <br />                
+                        <Container className={classes.mainContainer}>            
+                            <Grid container>
+                                <Grid item xs={12}>
+                                    <Switch>
+                                        <Route exact path="/">
+                                            <span>Hi there</span>
+                                            <Home />
+                                        </Route>
+                                        <Route path="/about/">                        
+                                            <About />
+                                        </Route>
+                                        <Route path="/experience">
+                                            <Experience />
+                                        </Route>
+                                        <Route path="/education">
+                                            <Education />
+                                        </Route>
+                                        <Route>
+                                            <NoMatch />
+                                        </Route>
+                                    </Switch>      
+                                </Grid>
+                            </Grid>
+                        </Container>    
+                    </Box>
+                </BrowserRouter>
+            </MuiThemeProvider>
+        </Provider>
     )
 }
 
@@ -94,11 +132,7 @@ function NoMatch() {
 }
 
 ReactDOM.render(
-    <Provider store={store}>
-        <ThemeProvider theme={theme}>
-            <App />
-        </ThemeProvider>
-    </Provider>,
+    <App />,
     document.getElementById('root')
 );
 

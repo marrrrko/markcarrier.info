@@ -1,9 +1,6 @@
 import React from 'react'
-import Skeleton from '@material-ui/lab/Skeleton'
+import Section from './section'
 
 export default function About(props) {
-    if(props.about)
-        return (<p>{props.about}</p>)
-    else
-        return (<Skeleton></Skeleton>)
+    return <Section section={props.about} />
 }

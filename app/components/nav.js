@@ -33,9 +33,7 @@ const useStyles = makeStyles(theme => ({
     },
     root: {
         flexGrow: 1
-    },
-
-
+    }
 }))
 
 export default function MarkNav(props) {
@@ -55,19 +53,12 @@ export default function MarkNav(props) {
         <div className={classes.root}>
             <AppBar position="sticky">
                 <Toolbar>
-                    <Link to="/">
-                        <Typography variant="h6" className={classes.title} noWrap>
-                            Mark Carrier
-                        </Typography>
-                    </Link>
+                    <Button color="inherit" component={Link} to="/"><Typography>Mark Carrier</Typography></Button>
                     <div className={classes.navButtons}>
-                        <Link to="/about">
-                            <IconButton className={classes.navButton}>
-                                <PersonIcon className={classes.buttonIcon} />
-                                <Typography variant="button" color="inherit" className={classes.navText}>About</Typography>
-                            </IconButton>
-                        </Link>
-                        <Link to="/experience">
+                        <Button className={classes.navButton} component={Link} to="/about">About</Button>
+                        <Button className={classes.navButton} component={Link} to="/experience">Experience</Button>
+                        <Button className={classes.navButton} component={Link} to="/education">Education</Button>
+                        {/* <Link to="/experience">
                             <IconButton className={classes.navButton}>
                                 <BathtubIcon className={classes.buttonIcon} />
                                 <Typography variant="button" color="inherit">Experience</Typography>
@@ -78,7 +69,7 @@ export default function MarkNav(props) {
                                 <SchoolIcon className={classes.buttonIcon} />
                                 <Typography variant="button" color="inherit">Education</Typography>
                             </IconButton>                       
-                        </Link>
+                        </Link> */}
                     </div>
                     <Checkbox 
                         checked={state.checked}

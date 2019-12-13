@@ -1,0 +1,68 @@
+{
+    "sections": [
+        {
+            "id": "about",
+            "title": "About Mark Carrier",
+            "image": {
+                "url": "https://live.staticflickr.com/4429/37155103626_317fd9671f_k.jpg",
+                "alt": "Alcatraz"
+            },
+            "introBlock": "Happy provider of all software engineering elements needed to move projects from start to finish.",
+            "content": "I truly enjoy writing all kinds of software. Whether it's a mobile responsive web app using node.js or a smart home device algorithm in python, my goal is to get things working end-to-end without wasting time.\nOver the years, I've learned that the following elements play an essential role in making a software project successful:\n* A strong focus on quality while being flexible with regard to methodology and tools.\n* Having a good plan but being ready to change it at any time.\n* Building strong feedback loops that help detect problems early.\n\nI'm happy to work with almost any technology but favour the following:\n* Serverside: Node.js, Python, .Net Core\n* Client-side & Mobile: React, Bootstrap, responsive and progressive design\n* Data-persistence: Postgres, Redis, CouchDB\n* Infrastructure: Linux, Docker, AWS\n\nMy company is based in Montreal, Canada. I am currently living in beautiful Antalya, Turkey."
+        },
+        {
+            "id": "education",
+            "title": "Education",
+            "image": {
+                "url": "https://live.staticflickr.com/4268/34718574710_489566a4bb_5k.jpg",
+                "alt": "Build"
+            },        
+            "sections": [
+                {
+                    "title": "Bachelor of Electrical Engineering,",
+                    "date": "April 2008",
+                    "content": "**McGill University, Montreal, Canada**  \nwith specialization in telecommunications."
+                },
+                {
+                    "title": "Diploma of collegial studies in Pure and Applied Sciences",
+                    "date": "May 2003",
+                    "content": "**CÉGEP de Trois-Rivières, Trois-Rivières, Canada**"
+                }
+            ]
+        },
+        {
+            "id": "experience",
+            "title": "Work Experience",
+            "image": {
+                "url": "https://live.staticflickr.com/4334/36948366880_e5df24b589_5k.jpg",
+                "alt": "Mt Tamalpais"
+            },
+            "sections": [
+                {
+                    "title": "Software Engineering Contractor",
+                    "date": "September 2018 to August 2019",
+                    "subtitle": "PBSC Urban Solutions, Montreal, Canada & Antalya, Turkey (remote)",
+                    "content": "Developed bicycle sharing system kiosk platform for multiple large scale deployments in large cities such as Barcelona, Buenos Aires and Monaco.\n* Developed high performance **Python** and **Node.js** applications that run on resource limited **ARM** based system (Beaglebone Black).\n* Augmented existing software system to support a variety of new hardware components such as solar panel powering, GPS tracking, Internet of Things ( **IoT** ) devices, battery charging systems and contactless/near field communication ( **NFC** ) card readers.\n* Improved existing system quality through increased unit test coverage and assiduous code reviews.\n* Improved development infrastructure by moving part of build system to **Docker**.\n"
+                },
+                {
+                    "title": "Software Engineering Architect",
+                    "date": "August 2016 to August 2018",
+                    "subtitle": "PowerSchool LLC, Montreal, Canada (remote)",
+                    "content": "Worked within a large team as software engineering architect build the leading classroom cloud solution used by millions of students and teachers.\n* Developed custom identity management solution using the **Ping Identity** Platform. The solution had to consolidate different pre existing login systems across multiple technologies and hosting environments while remaining user friendly and highly secure. Key technologies: **OAuth 2.0** , **OpenIdConnect** , **SAML** , LDAP, Google Sign-In, Azure AD, Microsoft Active Directory, **Kafka**.\n* Developed multiple web apps using **node.js** , **TypeScript** , **Docker** , **Kubernetes** , **AWS** and Azure.\n* Trained and mentored other teams and developers on subjects such as web security, OAuth 2.0, **Scrum** and software design patterns.\n* Assisted other teams in implementing SSO for products built in Java, Ruby, Node.js and .Net."
+                },
+                {
+                    "title": "Software Developer, Team Leader, Development Manager,",
+                    "date": "August 2008 to August 2016",
+                    "subtitle": "SRB Education Solutions, Edmonton & Montreal, Canada (remote)",
+                    "content": "* Built innovative web & mobile products in the education sector using the .Net framework.\n  * Designed and developed a mobile responsive custom forms platform using .Net MVC , Apache **CouchDB** ( **NoSQL), backbone.js (SPA)** and **bootstrap** as part of a very successful online student registration product for school districts.\n  * Designed and developed a new leading edge outcomes based assessment tool to replace traditional grading systems using .Net MVC and **Domain Driven Design**.\n  * Designed and developed a technology platform that integrates multiple SRB products (Java, .Net) into a unified mobile optimized user experience using **RESTful APIs** and **OpenId**.\n* Managed an agile team of 4-5 developers responsible for developing and supporting multiple products used by tens of thousands of teachers, parents, students and school administrators.\n* Supported dozens of client installations and SaaS.\n* Migrated team process from traditional project management to **Agile/Scrum** and acted as **product owner** for multiple products. Also participated in the development of the company’s strategic plan and roadmap.\n* Supported the sales organization by participating in demonstrations at customer sites.\n"
+                },
+                {
+                    "title": "Software Developer, Systems Integration Engineer Intern,",
+                    "date": "May 2006 to June 2008",
+                    "subtitle": "Nortel, Montreal, Canada",
+                    "content": "* Developed integration software for optical network management systems compliant with TMF standard using **Java SE**. * Worked within a small consulting team using Agile development principles.\n* Supported carrier class customers in the deployment of network management products and solutions.\n* Wrote technical documentation and trained new employees and customer support staff.\n* Worked with Nortel optical and data hardware."
+                }
+            ]
+        }        
+    ]
+}
