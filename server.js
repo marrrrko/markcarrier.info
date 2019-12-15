@@ -32,6 +32,7 @@ async function startServer(resume, port) {
             let app = new Koa()
             app.use(serve('dist', {  }))
             app.use(mount('/assets', serve('dist/assets')))
+            
             app.use(async (ctx, next) => {
                 console.log(`Serving non static path "${ctx.path}"`)
                 if(!ctx.path.startsWith("/api/") && ctx.method == "GET") {

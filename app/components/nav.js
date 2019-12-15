@@ -9,11 +9,6 @@ import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom"
 
-//Icons
-import PersonIcon from '@material-ui/icons/PersonOutline'
-import BathtubIcon from '@material-ui/icons/BathtubOutlined'
-import SchoolIcon from '@material-ui/icons/School'
-
 //Styles
 import { makeStyles } from '@material-ui/core/styles'
 

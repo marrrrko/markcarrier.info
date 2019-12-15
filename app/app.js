@@ -17,6 +17,13 @@ import Grid from '@material-ui/core/Grid'
 import Container from '@material-ui/core/Container'
 import Paper from '@material-ui/core/Paper'
 import Box from '@material-ui/core/Box'
+import BottomNavigation from '@material-ui/core/BottomNavigation'
+import BottomNavigationAction from '@material-ui/core/BottomNavigationAction'
+
+//Icons
+import PersonIcon from '@material-ui/icons/Person'
+import BathtubIcon from '@material-ui/icons/Bathtub'
+import SchoolIcon from '@material-ui/icons/School'
 
 //Theming & Styles
 import "./mark.css"
@@ -38,6 +45,11 @@ const useStyles = makeStyles(theme => ({
       textAlign: 'center',
       color: theme.palette.text.secondary,
     },
+    stickToBottom: {
+        width: '100%',
+        position: 'fixed',
+        bottom: 0,
+      },
   }));
 
 const theme = createMuiTheme({
@@ -87,7 +99,9 @@ function App(props) {
             <MuiThemeProvider theme={theme}>
                 <BrowserRouter>
                     <Box>
-                        <MarkNav />
+                        <Box display={{ xs: 'none', sm: 'block' }} >
+                            <MarkNav />
+                        </Box>
                         <br />                
                         <Container className={classes.mainContainer}>            
                             <Grid container>
@@ -111,8 +125,30 @@ function App(props) {
                                         </Route>
                                     </Switch>      
                                 </Grid>
-                            </Grid>
-                        </Container>    
+                            </Grid>                            
+                        </Container>                        
+                    </Box>
+                    <Box display={{ xs: 'block', sm: 'none' }} >
+                        <BottomNavigation showLabels={true} className={classes.stickToBottom}>
+                            <BottomNavigationAction
+                                component={Link}
+                                to="/about"
+                                label="About"
+                                icon={<PersonIcon />}
+                            />
+                            <BottomNavigationAction
+                                component={Link}
+                                to="/experience"
+                                label="Experience"
+                                icon={<BathtubIcon />}
+                            />
+                            <BottomNavigationAction
+                                component={Link}
+                                to="/education"
+                                label="Education"
+                                icon={<SchoolIcon />}
+                            />
+                        </BottomNavigation>  
                     </Box>
                 </BrowserRouter>
             </MuiThemeProvider>
