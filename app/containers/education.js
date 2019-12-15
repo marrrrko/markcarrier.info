@@ -4,7 +4,8 @@ import Education from '../components/education'
 
 const mapStateToProps = function(state) {
     return {
-        education: state.profile && state.profile.education
+        education: state.profile && state.profile.education,
+        receivedImages: state.receivedImages
     }
 }
 

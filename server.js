@@ -1,4 +1,4 @@
-//const mount = require('koa-mount')
+const mount = require('koa-mount')
 const serve = require('koa-static')
 const send = require('koa-send')
 const Koa = require('koa')
@@ -30,11 +30,11 @@ async function startServer(resume, port) {
     return new Promise(function(resolve, reject) {
         try {
             let app = new Koa()
-            app.use(serve('dist', { index: "fred.html" }))
+            app.use(serve('dist', {  }))
+            app.use(mount('/assets', serve('dist/assets')))
             app.use(async (ctx, next) => {
                 console.log(`Serving non static path "${ctx.path}"`)
                 if(!ctx.path.startsWith("/api/") && ctx.method == "GET") {
-                    console.log("App provided")
                     await send(ctx, "./dist/index.html")
                 }
                 await next()

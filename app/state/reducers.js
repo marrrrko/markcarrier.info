@@ -1,10 +1,13 @@
 
 import { ACTION_TYPES } from './actions'
+import * as _ from 'lodash'
 
 const defaultState = {
     lightsOn: false,
     profile: null,
-    profileRequestInProgress: false
+    profileRequestInProgress: false,
+    requestedImages: [],
+    receivedImages: []
 }
 
 export default function reducer(state = defaultState, action) {
@@ -20,7 +23,16 @@ export default function reducer(state = defaultState, action) {
         case ACTION_TYPES.RECEIVE_PROFILE:
             return Object.assign({}, state, {
                 profileRequestInProgress: false,
-                profile: action.json
+                profile: action.profile
+            })
+        case ACTION_TYPES.REQUEST_PROFILE_IMAGE:
+            return Object.assign({}, state, {
+                requestedImages: state.requestedImages.concat([action.imageUrl])
+            })
+        case ACTION_TYPES.RECEIVE_PROFILE_IMAGE:
+            return Object.assign({}, state, {
+                requestedImages: _.without(state.requestedImages, action.imageUrl),
+                receivedImages: state.receivedImages.concat([action.imageUrl])
             })
         default:
             if(!action.type.startsWith("@@"))

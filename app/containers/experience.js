@@ -4,7 +4,8 @@ import Experience from '../components/experience'
 
 const mapStateToProps = function(state) {
     return {
-        experience: state.profile && state.profile.experience
+        experience: state.profile && state.profile.experience,
+        receivedImages: state.receivedImages
     }
 }
 

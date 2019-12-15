@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Skeleton from '@material-ui/lab/Skeleton'
 import Typography from '@material-ui/core/Typography'
 import ReactMarkdown from 'react-markdown'
@@ -17,9 +17,12 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function Section(props) {
+
     const classes = useStyles()
 
-    if(!props.section)
+    let shouldWaitForImage = props.section && (props.section.image && !props.receivedImages.includes(props.section.image.url))
+
+    if(!props.section || shouldWaitForImage)
         return (<div><Skeleton /><Skeleton variant="rect" height={400} /><Skeleton/><Skeleton/><Skeleton/><Skeleton/></div>)
     
     let level = props.level || 1
@@ -51,7 +54,13 @@ export default function Section(props) {
             {props.section.sections != undefined && props.section.sections.map(
                 (section) => <Section section={section} key={section.title} level={level + 1} />
             )}
-        </>)
+        </>
+    )
+
+}
+
+function fetchImage() {
+
 }
 
 function RightHangingDate(props) {

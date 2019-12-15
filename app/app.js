@@ -1,7 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
-import * as actions from './state/actions'
+
+import * as api from './api-access'
 
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom"
 
@@ -136,4 +137,4 @@ ReactDOM.render(
     document.getElementById('root')
 );
 
-store.dispatch(actions.fetchProfile())
+store.dispatch(api.getProfileAndProfileImages())
