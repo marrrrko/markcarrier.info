@@ -11,7 +11,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build Docker image
-      run: docker build . --file Dockerfile --tag docker.pkg.github.com/markcarrier/markcarrier.info/mwebserver:$GITHUB_SHA
+      run: docker build . --file Dockerfile --tag docker.pkg.github.com/markcarrier/markcarrier.info/web-server:$GITHUB_SHA
+    
+    - name: Log into registry
+      run: docker login -u $USERNAME -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
     
     - name: Publish to github registry
-      run: docker push docker.pkg.github.com/markcarrier/markcarrier.info/mwebserver:$GITHUB_SHA
+      run: docker push docker.pkg.github.com/markcarrier/markcarrier.info/web-server:$GITHUB_SHA
