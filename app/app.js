@@ -11,19 +11,13 @@ import About from './containers/about'
 import Experience from './containers/experience'
 import Education from './containers/education'
 import MarkNav from './containers/nav'
-import MarkBulb from './containers/bulb'
+import Typography from '@material-ui/core/Typography'
 
 import Grid from '@material-ui/core/Grid'
 import Container from '@material-ui/core/Container'
-import Paper from '@material-ui/core/Paper'
 import Box from '@material-ui/core/Box'
-import BottomNavigation from '@material-ui/core/BottomNavigation'
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction'
-
-//Icons
-import PersonIcon from '@material-ui/icons/Person'
-import BathtubIcon from '@material-ui/icons/Bathtub'
-import SchoolIcon from '@material-ui/icons/School'
+import BottomMarkNavigation from './components/bottom-navigation'
+import BottomButtons from './components/bottom-buttons'
 
 //Theming & Styles
 import "./mark.css"
@@ -41,16 +35,10 @@ const useStyles = makeStyles(theme => ({
         marginBottom: theme.spacing(8)
     },
     paper: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
+      padding: theme.spacing(3, 2),
       color: theme.palette.text.secondary,
     },
-    stickToBottom: {
-        width: '100%',
-        position: 'fixed',
-        bottom: 0,
-      },
-  }));
+}));
 
 const theme = createMuiTheme({
     typography: {
@@ -104,12 +92,13 @@ function App(props) {
                         </Box>
                         <br />                
                         <Container className={classes.mainContainer}>            
-                            <Grid container>
+                            <Grid container spacing={1}>
                                 <Grid item xs={12}>
                                     <Switch>
                                         <Route exact path="/">
-                                            <span>Hi there</span>
-                                            <Home />
+                                            {/* <span>Hi there</span>                                            
+                                            <Home /> */}
+                                            <About />
                                         </Route>
                                         <Route path="/about/">                        
                                             <About />
@@ -123,49 +112,21 @@ function App(props) {
                                         <Route>
                                             <NoMatch />
                                         </Route>
-                                    </Switch>      
-                                </Grid>
+                                    </Switch>                                          
+                                </Grid>                                
+                                <BottomButtons />
                             </Grid>                            
                         </Container>                        
                     </Box>
-                    <Box display={{ xs: 'block', sm: 'none' }} >
-                        <BottomNavigation showLabels={true} className={classes.stickToBottom}>
-                            <BottomNavigationAction
-                                component={Link}
-                                to="/about"
-                                label="About"
-                                icon={<PersonIcon />}
-                            />
-                            <BottomNavigationAction
-                                component={Link}
-                                to="/experience"
-                                label="Experience"
-                                icon={<BathtubIcon />}
-                            />
-                            <BottomNavigationAction
-                                component={Link}
-                                to="/education"
-                                label="Education"
-                                icon={<SchoolIcon />}
-                            />
-                        </BottomNavigation>  
-                    </Box>
+                    <BottomMarkNavigation />                    
                 </BrowserRouter>
             </MuiThemeProvider>
         </Provider>
     )
 }
 
-function Home() {
-    const classes = useStyles();
-    return (
-        <Paper className={classes.paper}>
-            <MarkBulb />
-        </Paper>)
-}
-
 function NoMatch() {
-    return (<Paper>404 Not Found</Paper>)
+    return (<><Typography variant="h1">Woah!</Typography><Typography variant="body1">404 Not Found</Typography></>)
 }
 
 ReactDOM.render(

@@ -3,7 +3,7 @@ const serve = require('koa-static')
 const send = require('koa-send')
 const Koa = require('koa')
 const _ = require('lodash')
-const wait = ms => new Promise((resolve)=>setTimeout(resolve, ms))
+//const wait = ms => new Promise((resolve)=>setTimeout(resolve, ms))
 
 async function loadResumeDataFromFile() {
     let resumeText = await readFileAsync(__dirname + '/resume/resume.json', 'utf-8')
@@ -43,7 +43,7 @@ async function startServer(resume, port) {
             app.use(async (ctx, next) => {
                 await next()    
                 if(ctx.path == "/api/profile" && ctx.method == "GET") {
-                    await wait(3000)
+                    //await wait(3000)
                     ctx.body = resume
                 }
             })

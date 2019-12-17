@@ -40,16 +40,26 @@
         }
 
         .fa {
-            color: #00004d;
+            color: #595959;
             width: 35px;
             text-align: center;
-            font-size: 1.3em;
+            font-size: 1.4em;
+            line-height: 20px;
+            vertical-align: middle;
+            padding-bottom: 2px;
         }
 
-        .links a {
+        .links > a {
             color: black;
+            vertical-align: middle;            
+            display: inline-block;
+            text-decoration: none;       
+        }
+
+        .links > a > span {
+            text-decoration: underline;
+            line-height: 20px;
             vertical-align: middle;
-            line-height: 30px;
         }
     </style>
 </head>
@@ -58,16 +68,28 @@
     <div class="links">
         <h1>Mark Carrier</h1>
         <h2>Resume</h2>
-        <i class="fa fa-cubes" aria-hidden="true"></i>
-        <a href="https://resume.markcarrier.info">resume.markcarrier.info</a><br/>
-        <i class="fa fa-linkedin-square" aria-hidden="true"></i>
-        <a href="https://linkedin.com/in/markcarrier0x00/">linkedin.com/in/markcarrier0x00/</a>
-        <h2>Code</h2>
-        <i class="fa fa-github" aria-hidden="true"></i>
-        <a href="https://github.com/MarkCarrier/">github.com/MarkCarrier/</a>
+        
+        <a href="https://resume.markcarrier.info">
+            <i class="fa fa-cubes" aria-hidden="true"></i>
+            <span>resume.markcarrier.info</span>
+        </a>
+<!--         
+        <br/>
+        <a href="https://linkedin.com/in/markcarrier0x00/">
+            <i class="fa fa-linkedin-square" aria-hidden="true"></i>
+            <span>linkedin.com/in/markcarrier0x00/</span>
+        </a> -->
+        <h2>Code</h2>        
+        <a href="https://github.com/MarkCarrier/">
+            <i class="fa fa-github" aria-hidden="true"></i>
+            <span>github.com/MarkCarrier/</span>
+        </a>
+
         <h2>Photography</h2>
-        <i class="fa fa-flickr" aria-hidden="true"></i>
-        <a href="https://flickr.com/photos/markcarrier/">flickr.com/photos/markcarrier/</a>
+        <a href="https://flickr.com/photos/markcarrier/">
+            <i class="fa fa-flickr" aria-hidden="true"></i>
+            <span>flickr.com/photos/markcarrier/</span>
+        </a>
     </div>
 </body>
 

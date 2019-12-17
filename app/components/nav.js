@@ -48,29 +48,17 @@ export default function MarkNav(props) {
         <div className={classes.root}>
             <AppBar position="sticky">
                 <Toolbar>
-                    <Button color="inherit" component={Link} to="/"><Typography>Mark Carrier</Typography></Button>
+                    <Button color="inherit" href="https://markcarrier.info"><Typography>Mark Carrier</Typography></Button>
                     <div className={classes.navButtons}>
                         <Button className={classes.navButton} component={Link} to="/about">About</Button>
                         <Button className={classes.navButton} component={Link} to="/experience">Experience</Button>
                         <Button className={classes.navButton} component={Link} to="/education">Education</Button>
-                        {/* <Link to="/experience">
-                            <IconButton className={classes.navButton}>
-                                <BathtubIcon className={classes.buttonIcon} />
-                                <Typography variant="button" color="inherit">Experience</Typography>
-                            </IconButton>
-                        </Link>
-                        <Link to="/education">
-                            <IconButton className={classes.navButton}>
-                                <SchoolIcon className={classes.buttonIcon} />
-                                <Typography variant="button" color="inherit">Education</Typography>
-                            </IconButton>                       
-                        </Link> */}
                     </div>
-                    <Checkbox 
+                    {/* <Checkbox 
                         checked={state.checked}
                         onChange={handleChange}
                         value="light"
-                    />
+                    /> */}
                 </Toolbar>
             </AppBar>
         </div>
