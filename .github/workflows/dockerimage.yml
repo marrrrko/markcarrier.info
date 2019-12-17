@@ -4,11 +4,14 @@ on: [push]
 
 jobs:
 
-  build:
+  build-and-publish:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag markcarrier.info:$(date +%s)
+    - name: Build Docker image
+      run: docker build . --file Dockerfile --tag docker.pkg.github.com/markcarrier/markcarrier.info/mwebserver:$(date +%s)
+    
+    - name: Publish to github registry
+      run: docker push docker.pkg.github.com/markcarrier/markcarrier.info/mwebserver:$(date +%s)
