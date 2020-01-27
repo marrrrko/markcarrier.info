@@ -1,6 +1,7 @@
 {
     "family": "markcarrier-resume",
     "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::879679279257:role/ecsTaskExecutionRole",
     "containerDefinitions": [
         {
             "portMappings": [
