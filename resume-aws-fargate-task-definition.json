@@ -4,15 +4,6 @@
     "containerDefinitions": [
         {
             "dnsSearchDomains": null,
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "secretOptions": null,
-                "options": {
-                    "awslogs-group": "/ecs/markcarrier-resume",
-                    "awslogs-region": "ca-central-1",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            },
             "entryPoint": null,
             "portMappings": [
                 {
