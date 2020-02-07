@@ -3,35 +3,33 @@
     "networkMode": "awsvpc",
     "executionRoleArn": "arn:aws:iam::879679279257:role/ecsTaskExecutionRole",
     "containerDefinitions": [
-        {
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-group": "/ecs/markcarrier-resume",
-                    "awslogs-region": "ca-central-1",
-                    "awslogs-stream-prefix": "ecs"
-                }
-            },
-            "portMappings": [
-                {
-                    "hostPort": 8888,
-                    "protocol": "tcp",
-                    "containerPort": 8888
-                }
-            ],
-            "cpu": 0,
-            "environment": [],
-            "mountPoints": [],
-            "memory": 300,
-            "memoryReservation": 128,
-            "volumesFrom": [],
-            "name": "markcarrier-resume",
-            "image": "node:10-alpine"
-        }
-    ],
+      {
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/markcarrier-resume",
+            "awslogs-region": "ca-central-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        },
+        "portMappings": [
+          {
+            "hostPort": 8888,
+            "protocol": "tcp",
+            "containerPort": 8888
+          }
+        ],
+        "cpu": 0,
+        "memory": 300,
+        "memoryReservation": 128,
+        "image": null,
+        "essential": true,
+        "name": "markcarrier-resume"
+      }
+    ],    
     "requiresCompatibilities": [
-        "FARGATE"
+      "FARGATE"
     ],
     "cpu": "256",
     "memory": "512"
-}
+  }
