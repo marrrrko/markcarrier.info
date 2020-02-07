@@ -78,5 +78,5 @@ jobs:
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: resume-service
-        cluster: markcarrier-resume
+        cluster: markcarrier
         wait-for-service-stability: true
