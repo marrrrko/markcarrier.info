@@ -1,0 +1,16 @@
+{
+    "aws": {
+        "clusterName": "mark",
+        "appName": "resume",
+        "appInternalPort": 8888,
+        "region": "ca-central-1",
+        "clusterArn": null,
+        "subnetIds": [],        
+        "loadBalancerTargetGroupArn": null,
+        "clusterSecurityGroupId": null,
+        "cpu": "256",
+        "memory": "512",
+        "desiredCount": 1,
+        "ecrRepository": "123.dkr.ecr.ca-central-1.amazonaws.com/myapp"
+    }
+}

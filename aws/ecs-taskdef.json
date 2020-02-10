@@ -1,0 +1,35 @@
+{
+  "family": "resume-taskdef",
+  "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::879679279257:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/resume",
+          "awslogs-region": "ca-central-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "portMappings": [
+        {
+          "hostPort": 8888,
+          "protocol": "tcp",
+          "containerPort": 8888
+        }
+      ],
+      "cpu": 0,
+      "memory": 300,
+      "memoryReservation": 128,
+      "image": "879679279257.dkr.ecr.ca-central-1.amazonaws.com/markcarrier-resume:latest",
+      "essential": true,
+      "name": "resume-container"
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}
