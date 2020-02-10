@@ -10,10 +10,6 @@ elif [ "$1" == "register-task" ]
 then
     # Register the task definition
     aws ecs register-task-definition --region $REGION --cli-input-json $TASK_DEF_FILE
-elif [ "$1" == "create-cluster" ]
-then
-    # Create an ECS Fargate Cluster
-    aws ecs create-cluster --region $REGION --cluster-name $CLUSTER_NAME
 elif [ "$1" == "create-service" ]
 then
     # Create the ECS Service
@@ -34,7 +30,6 @@ else
     echo "You must call this script with one of the following commands:"
     echo "  create-repo"
     echo "  register-task"
-    echo "  create-cluster"
     echo "  create-service"
     echo "  force-redeploy"
     echo ""
