@@ -11,6 +11,7 @@
         "cpu": "256",
         "memory": "512",
         "desiredCount": 1,
-        "ecrRepository": "123.dkr.ecr.ca-central-1.amazonaws.com/myapp"
+        "ecrRegistry": "123.dkr.ecr.ca-central-1.amazonaws.com",
+        "ecrRepository": "myapp"
     }
 }

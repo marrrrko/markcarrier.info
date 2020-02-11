@@ -204,7 +204,9 @@ function run() {
                 "clusterSecurityGroupId": awsConfig.ClusterSecurityGroupId,
                 "cpu": awsConfig.cpu,
                 "memory": awsConfig.memory,
-                "desiredCount": awsConfig.desiredCount
+                "desiredCount": awsConfig.desiredCount,
+                "ecrRegistry": awsConfig.ecrRegistry,
+                "ecrRepository": awsConfig.ecrRepository
             }
         }, null, "    "))
     })
