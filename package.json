@@ -15,7 +15,7 @@
     "watch:build": "webpack --watch",
     "watch:server": "nodemon \"server.js\"",
     "dev": "webpack-dev-server --open",
-    "build": "webpack",
+    "build": "webpack --mode=production",
     "setup-ecs": "node aws/setup-ecs-cluster.js",
     "deploy-to-ecs": "node aws/deploy-to-ecs.js"
   },
