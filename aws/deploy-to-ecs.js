@@ -94,7 +94,7 @@ async function deployToCluster(awsConfig) {
         services: [ `${awsConfig.appName}-serv` ]      
     })
 
-    if(existingServices.services.length) {
+    if(existingServices.services.filter(s => s.status == "ACTIVE").length) {
         return await updateService(arguments[0])
     } else {
         return await createService(arguments[0])
@@ -118,6 +118,11 @@ async function createService(awsConfig) {
                 containerPort: awsConfig.appInternalPort.toString(),
                 targetGroupArn: awsConfig.loadBalancerTargetGroupArn
             },
+            {
+                containerName: `${awsConfig.appName}-container`,
+                containerPort: (awsConfig.appInternalPort + 1).toString(),
+                targetGroupArn: awsConfig.loadBalancerTargetGroup2Arn
+            }
         ],
         networkConfiguration: {
             awsvpcConfiguration: {

@@ -35,18 +35,17 @@ async function startResumeServer(port) {
                 app.use(serve('dist', {  }))
                 app.use(mount('/assets', serve('dist/assets')))
                 
-                app.use(async (ctx, next) => {                    
-                    if(!ctx.path.startsWith("/api/") && ctx.method == "GET") {
-                        console.log(`Serving resume app`)
-                        await send(ctx, "./dist/index.html")
-                    }
-                    await next()
-                })
                 app.use(async (ctx, next) => {
                     await next()    
                     if(ctx.path == "/api/profile" && ctx.method == "GET") {
-                        //await wait(3000)
                         ctx.body = resume
+                    } else if(ctx.path == "/api/health" && ctx.method == "GET") {
+                        ctx.body = {
+                            healthy: true
+                        }
+                    } else {
+                        console.log(`Serving resume app`)
+                        await send(ctx, "./dist/index.html")
                     }
                 })
     
@@ -65,8 +64,14 @@ async function startLandingPageServer(port) {
             let app = new Koa()
             app.use(mount('/assets', serve('dist/assets')))
             app.use(async (ctx, next) => {
-                console.log(`Serving landing page`)
-                await send(ctx, "./dist/assets/home.html")
+                if(ctx.path == "/api/health" && ctx.method == "GET") {
+                    ctx.body = {
+                        healthy: true
+                    }
+                } else {
+                    console.log(`Serving landing page`)
+                    await send(ctx, "./dist/assets/home.html")
+                }
             })
             app.listen(port, resolve)
         } catch(err) {
