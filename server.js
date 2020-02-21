@@ -26,29 +26,49 @@ function readFileAsync(filename, encoding) {
     })
 }
 
-async function startServer(resume, port) {
+async function startResumeServer(port) {
+    loadResumeDataFromFile()
+    .then(function(resume) {
+        return new Promise(function(resolve, reject) {
+            try {
+                let app = new Koa()
+                app.use(serve('dist', {  }))
+                app.use(mount('/assets', serve('dist/assets')))
+                
+                app.use(async (ctx, next) => {                    
+                    if(!ctx.path.startsWith("/api/") && ctx.method == "GET") {
+                        console.log(`Serving resume app`)
+                        await send(ctx, "./dist/index.html")
+                    }
+                    await next()
+                })
+                app.use(async (ctx, next) => {
+                    await next()    
+                    if(ctx.path == "/api/profile" && ctx.method == "GET") {
+                        //await wait(3000)
+                        ctx.body = resume
+                    }
+                })
+    
+                app.listen(port, resolve)
+            } catch(err) {
+                console.error(err)
+                reject(err)
+            }
+        })
+    })   
+}
+
+async function startLandingPageServer(port) {
     return new Promise(function(resolve, reject) {
         try {
             let app = new Koa()
-            app.use(serve('dist', {  }))
             app.use(mount('/assets', serve('dist/assets')))
-            
             app.use(async (ctx, next) => {
-                console.log(`Serving non static path "${ctx.path}"`)
-                if(!ctx.path.startsWith("/api/") && ctx.method == "GET") {
-                    await send(ctx, "./dist/index.html")
-                }
-                await next()
+                console.log(`Serving landing page`)
+                await send(ctx, "./dist/assets/home.html")
             })
-            app.use(async (ctx, next) => {
-                await next()    
-                if(ctx.path == "/api/profile" && ctx.method == "GET") {
-                    //await wait(3000)
-                    ctx.body = resume
-                }
-            })
-
-            app.listen(port, () => resolve())
+            app.listen(port, resolve)
         } catch(err) {
             console.error(err)
             reject(err)
@@ -57,8 +77,10 @@ async function startServer(resume, port) {
 }
 
 async function init() {
-    let resumeData = await loadResumeDataFromFile()
-    await startServer(resumeData, 8888)
+    await startResumeServer(8888)
+    console.log("Resume app served on 8888")
+    await startLandingPageServer(8889)
+    console.log("Landing page app served on 8889")
 }
 
 init()

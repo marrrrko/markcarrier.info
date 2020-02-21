@@ -30,6 +30,11 @@ async function registerTaskDefinition(awsConfig) {
                         hostPort: awsConfig.appInternalPort,
                         protocol: "tcp",
                         containerPort: awsConfig.appInternalPort
+                    },
+                    {
+                        hostPort: awsConfig.appInternalPort + 1,
+                        protocol: "tcp",
+                        containerPort: awsConfig.appInternalPort + 1
                     }
                 ],
                 cpu: 0,

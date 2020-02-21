@@ -141,7 +141,7 @@ async function createLoadBalancer(awsConfig) {
             {
                 FromPort: awsConfig.appInternalPort,
                 IpProtocol: "tcp",
-                ToPort: awsConfig.appInternalPort,
+                ToPort: awsConfig.appInternalPort + 1,
                 UserIdGroupPairs: [
                     {
                         Description: "Welcome load balancer",
