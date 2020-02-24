@@ -2,3 +2,4 @@ node_modules
 dist
 aws/set_aws_config.sh
 config/local*
+writings-src
