@@ -6,21 +6,40 @@ const _ = require('lodash')
 const fs = require('fs-extra')
 const frontMatter = require('front-matter')
 const marked = require('marked')
+const mustache = require('mustache');
+const sass = require('node-sass');
 
 const srcDir = __dirname + "/../writings-src"
 const remote = "https://github.com/MarkCarrier/public-writings.git"
+const sassSrc = "./mini-mark.scss"
 
 module.exports = async function startBlogServer(port) {
 
+    const css = await buildCSS()
     const posts = await loadPosts()
 
     return new Promise(function(resolve, reject) {
         try {
             let app = new Koa()
-            app.use(mount('/src', serve(srcDir)))
-            app.use(async (ctx, next) => {  
-                ctx.type = 'html';              
-                ctx.body = posts[0].html                
+            app.use(mount('/post/images', serve(srcDir + "/images")))
+            app.use(async (ctx, next) => {
+                if(ctx.path == "/style.css") {
+                    ctx.type = 'text/css'              
+                    ctx.body = css.css
+                } else {
+                    await next()
+                }
+            })
+            app.use(async (ctx, next) => {
+                const posturl = ctx.path.replace("/post/","").toUpperCase()
+                const matchedPost = posts[posturl]
+                if(ctx.path.startsWith("/post/") && matchedPost) {                    
+                    ctx.type = 'text/html';              
+                    ctx.body = mustache.render(postTemplate, { title: matchedPost.attributes.title, html: matchedPost.html})          
+                } else {
+                    ctx.status = 404
+                    ctx.body = "Post not found"
+                }
             })
             app.listen(port, resolve)
         } catch(err) {
@@ -34,11 +53,34 @@ async function loadPosts() {
     const postFiles = await loadPostsFromSource()
     const posts = postFiles.map(postfile => frontMatter(postfile))
 
-    return posts.map(post => {
-        return {
-            ...post,
-            html: marked(post.body)
-        }
+    const urlPosts = posts.map(post => {
+        return post.attributes.urls.map(url => {
+            return {
+                url: url.toUpperCase(),
+                ...post,
+                html: marked(post.body)
+            }
+        })    
+    })
+
+    return _.flatten(urlPosts)
+    .reduce((dict, post) => {
+        dict[post.url] = post
+        return dict
+    }, {})
+
+}
+
+async function buildCSS() {
+    return new Promise(function(resolve, reject) {
+        sass.render({
+            file: sassSrc    
+        }, (err, result) => {
+            if(err)
+                reject(err)
+            else
+                resolve(result)
+        })
     })
 }
 
@@ -68,3 +110,25 @@ async function loadSrcFiles() {
 
     return files
 }
+
+const postTemplate = `
+<html>
+<head>
+    <title>{{title}}</title>
+    <link href="https://fonts.googleapis.com/css?family=Crimson+Text&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Spartan&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Work+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Dosis&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>    
+    <br /><br />
+    <div class="container">    
+        <div class="row">
+            <div class="col-sm-0 col-md-1 col-lg-2"></div>
+            <div class="col-sm-12 col-md-10 col-lg-8">{{{html}}}</div>
+            <div class="col-sm-0 col-md-1 col-lg-2"></div>
+        </div>
+    </div>
+    <br /><br /><br />
+</html>
+`
