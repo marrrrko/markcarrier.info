@@ -1,3 +1,51 @@
 $base-font-family:              'Spartan';
-$base-root-font-size:     18px;
-@import './node_modules/mini.css/src/flavors/mini-default.scss';
+$base-root-font-size:           17px;
+$blockquote-quotation-size:     0;
+$blockquote-color:              black;
+
+.page-line {
+    position: fixed;
+    width: 7px;
+    background-color: red;
+    top: 0px;
+    bottom: 0px;    
+    z-index: -102;
+}
+
+@media all {
+    .page-line {
+        right: 0px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .page-line {
+        right: 30px;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .page-line {
+        right: 110px;
+        width: 11px;
+    }
+}
+
+
+.side-note {
+    display: flex;
+    justify-content: flex-end;
+    
+}
+
+.side-note div {
+    font-size: 0.85rem;
+}
+
+@media screen and (prefers-color-scheme: light) {
+    @import './node_modules/mini.css/src/flavors/mini-default.scss';
+}
+
+@media screen and (prefers-color-scheme: dark) {
+    @import './node_modules/mini.css/src/flavors/mini-dark.scss';
+}
