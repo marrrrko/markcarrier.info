@@ -31,7 +31,11 @@ module.exports = async function startBlogServer(port) {
             let app = new Koa()
             app.use(mount('/post/images', serve(srcDir + "/images")))
             app.use(async (ctx, next) => {
-                if(ctx.path == "/style.css") {
+                if(ctx.path == "/api/health" && ctx.method == "GET") {
+                    ctx.body = {
+                        healthy: true
+                    }
+                } else if(ctx.path == "/style.css") {
                     ctx.type = 'text/css'              
                     ctx.body = css.css
                 } else {

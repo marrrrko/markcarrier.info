@@ -25,18 +25,13 @@ async function registerTaskDefinition(awsConfig) {
                         "awslogs-stream-prefix": "ecs"
                     }
                 },
-                portMappings: [
+                portMappings: awsConfig.appPorts.map(appPort => (
                     {
-                        hostPort: awsConfig.appInternalPort,
+                        hostPort: appPort.port,
                         protocol: "tcp",
-                        containerPort: awsConfig.appInternalPort
-                    },
-                    {
-                        hostPort: awsConfig.appInternalPort + 1,
-                        protocol: "tcp",
-                        containerPort: awsConfig.appInternalPort + 1
+                        containerPort: appPort.port
                     }
-                ],
+                )),
                 cpu: 0,
                 memory: 300,
                 memoryReservation: 128,
@@ -112,18 +107,13 @@ async function createService(awsConfig) {
         serviceName: `${awsConfig.appName}-serv`,
         cluster: awsConfig.clusterArn,
         desiredCount: awsConfig.desiredCount,
-        loadBalancers: [
+        loadBalancers: awsConfig.appPorts.map(appPort => (
             {
                 containerName: `${awsConfig.appName}-container`,
-                containerPort: awsConfig.appInternalPort.toString(),
-                targetGroupArn: awsConfig.loadBalancerTargetGroupArn
-            },
-            {
-                containerName: `${awsConfig.appName}-container`,
-                containerPort: (awsConfig.appInternalPort + 1).toString(),
-                targetGroupArn: awsConfig.loadBalancerTargetGroup2Arn
+                containerPort: appPort.port,
+                targetGroupArn: appPort.targetGroupArn
             }
-        ],
+        )),
         networkConfiguration: {
             awsvpcConfiguration: {
                 subnets: awsConfig.subnetIds,
@@ -156,13 +146,16 @@ async function updateService(awsConfig) {
 }
 
 async function buildDockerImageAndPushToRepo(awsConfig) {
-    //Should create repo if missing
-    //aws ecr create-repository --repository-name $CONTAINER_REPO_NAME --region $REGION
-    await runCommand(`$(aws ecr get-login --no-include-email --region ${awsConfig.region})`)
-    await runCommand(`docker build -t ${awsConfig.appName} .`)
-    await runCommand(`docker tag ${awsConfig.appName}:latest ${awsConfig.ecrRegistry}/${awsConfig.ecrRepository}:latest`)
-    await runCommand(`docker push ${awsConfig.ecrRegistry}/${awsConfig.ecrRepository}:latest`)
-
+    if(!awsConfig.skipDocker) {
+        //Should create repo if missing
+        //aws ecr create-repository --repository-name $CONTAINER_REPO_NAME --region $REGION
+        await runCommand(`$(aws ecr get-login --no-include-email --region ${awsConfig.region})`)
+        await runCommand(`docker build -t ${awsConfig.appName} .`)
+        await runCommand(`docker tag ${awsConfig.appName}:latest ${awsConfig.ecrRegistry}/${awsConfig.ecrRepository}:latest`)
+        await runCommand(`docker push ${awsConfig.ecrRegistry}/${awsConfig.ecrRepository}:latest`)
+    } else {
+        console.log("Skipping docker build")
+    }
     return awsConfig
 }
 
@@ -195,6 +188,15 @@ function getAWSConfig() {
 function run() {
     Promise.resolve()
     .then(getAWSConfig)
+    .then(function(awsConfig) {
+        
+        const commandLineArgs = process.argv.slice(2);
+        
+        return {
+            ...awsConfig,
+            skipDocker: commandLineArgs.includes("skip-docker")
+        }
+    })
     .then(buildDockerImageAndPushToRepo)
     .then(registerTaskDefinition)
     .then(deployToCluster)

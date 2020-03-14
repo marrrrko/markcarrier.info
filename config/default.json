@@ -2,7 +2,23 @@
     "aws": {
         "clusterName": "mark",
         "appName": "resume",
-        "appInternalPort": 8888,
+        "appPorts": [ 
+            { 
+                "name": "landing-page",
+                "port": 8888,
+                "targetGroupArn": ""
+            },
+            { 
+                "name": "resume",
+                "port": 8889,
+                "targetGroupArn": ""
+            },
+            { 
+                "name": "blog", 
+                "port": 8890,
+                "targetGroupArn": ""
+            }
+        ],
         "region": "ca-central-1",
         "clusterArn": null,
         "subnetIds": [],        

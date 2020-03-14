@@ -3,11 +3,11 @@ const config = require('config')
 
 async function createVpc(awsConfig) {
     try {
-        const callEC2 = awsutil.createAWSAPICaller("EC2", { apiVersion: "2016-11-15", region: awsConfig.region })                
-        console.log("Creating VPC")
+        const callEC2 = awsutil.createAWSAPICaller("EC2", { apiVersion: "2016-11-15", region: awsConfig.region })                        
         const vpc = await callEC2("createVpc", {
             CidrBlock: "10.0.0.0/16"
         })
+        console.log(`Configuring new VPC ${vpc.Vpc.VpcId}`)
         const availabilityZones = await callEC2("describeAvailabilityZones")
         console.log("\t  - Creating first subnet")
         const firstSubnet = await callEC2("createSubnet", {
@@ -48,7 +48,7 @@ async function createVpc(awsConfig) {
             RouteTableId: routeTable.RouteTable.RouteTableId,
             SubnetId: secondSubnet.Subnet.SubnetId
         })
-        console.log(`${vpc.Vpc.VpcId} ready!\n`)
+        console.log(`VPC ready.\n`)
 
         return {
             ...awsConfig,
@@ -66,8 +66,7 @@ async function createLoadBalancer(awsConfig) {
     const callEC2 = awsutil.createAWSAPICaller("EC2", { apiVersion: "2016-11-15", region: awsConfig.region })
     const callELBv2 = awsutil.createAWSAPICaller("ELBv2", { apiVersion: "2015-12-01", region: awsConfig.region })
     const callSTS = awsutil.createAWSAPICaller("STS", { apiVersion: "2011-06-15" })
-
-    console.log("Creating Load Balancer")
+    
     const loadBalancer = await callELBv2("createLoadBalancer", {
         Name: `${awsConfig.clusterName}-ecs-cluster-lb`,
         Subnets: [
@@ -75,6 +74,7 @@ async function createLoadBalancer(awsConfig) {
             awsConfig.SubnetIds[1]
         ]
     })
+    console.log(`Configuring new load balancer ${loadBalancer.LoadBalancers[0].Name}`)
     console.log("\t  - Creating security group for load balancer")
     const lbSecurityGroup = await callEC2("createSecurityGroup", {
         Description: `${awsConfig.clusterName}-ecs-cluster-load-balancer-security-group`,
@@ -104,21 +104,23 @@ async function createLoadBalancer(awsConfig) {
         SecurityGroups: [lbSecurityGroup.GroupId]
     })
 
-    console.log("\t  - Creating target group")
-    const lbTargetGroup = await callELBv2("createTargetGroup", {
-        Name: `${awsConfig.clusterName}-ecs-cluster-lb-target`,
-        TargetType: "ip",
-        Port: 80,
-        Protocol: "HTTP",
-        VpcId: awsConfig.VpcId
-    })
+    console.log("\t  - Creating target group(s)")
+    targetGroupConfigs = await createTargetGroups(callELBv2, awsConfig)
 
     console.log("\t  - Creating listener")
     const lbListener = await callELBv2("createListener", {
         DefaultActions: [
             {
-                TargetGroupArn: lbTargetGroup.TargetGroups[0].TargetGroupArn,
-                Type: "forward"
+                "Type": "forward",
+                "Order": 1,
+                "ForwardConfig": {
+                    "TargetGroups": targetGroupConfigs.map(
+                        appPort => ({
+                            TargetGroupArn: appPort.targetGroupArn,
+                            Weight: 1
+                        })
+                    )
+                }
             }
         ],
         LoadBalancerArn: loadBalancer.LoadBalancers[0].LoadBalancerArn,
@@ -137,30 +139,50 @@ async function createLoadBalancer(awsConfig) {
     console.log("\t  - Authorizing traffic from load balancer to cluster security group")
     const clusterIngressSecurityRule = await callEC2("authorizeSecurityGroupIngress", {
         GroupId: clusterSecurityGroup.GroupId,
-        IpPermissions: [
-            {
-                FromPort: awsConfig.appInternalPort,
+        IpPermissions: awsConfig.appPorts.map(appPort => 
+            ({
+                FromPort: appPort.port,
                 IpProtocol: "tcp",
-                ToPort: awsConfig.appInternalPort + 1,
+                ToPort: appPort.port,
                 UserIdGroupPairs: [
                     {
-                        Description: "Welcome load balancer",
+                        Description: appPort.name,
                         GroupId: lbSecurityGroup.GroupId,
                         UserId: userInfo.UserId
                     }
                 ]
-            }
-        ]
+            })
+        )
     })
 
-    console.log("Load balancer and target group ready!\n")
+    console.log("Load balancer and target group(s) ready.\n")
 
     return {
         ...awsConfig,
         LoaderBalancerArn: loadBalancer.LoadBalancers[0].LoadBalancerArn,
-        TargetGroupArn: lbTargetGroup.TargetGroups[0].TargetGroupArn,
+        appPorts: targetGroupConfigs,
         ClusterSecurityGroupId: clusterSecurityGroup.GroupId
     }
+}
+
+async function createTargetGroups(callELBv2, awsConfig) {
+    const createAllTargetGroups = awsConfig.appPorts.map( async appPort => {
+        const targetGroup = await callELBv2("createTargetGroup", {
+            Name: `${awsConfig.clusterName}-${appPort.name}`,
+            TargetType: "ip",
+            Port: 80,
+            Protocol: "HTTP",
+            VpcId: awsConfig.VpcId,
+            HealthCheckPath: "/api/health"
+        })
+
+        return {
+            ...appPort,
+            targetGroupArn: targetGroup.TargetGroups[0].TargetGroupArn
+        }
+    })
+
+    return Promise.all(createAllTargetGroups)
 }
 
 async function createCluster(awsConfig) {
@@ -171,7 +193,7 @@ async function createCluster(awsConfig) {
     const cluster = await callECS("createCluster", {
         clusterName: awsConfig.clusterName
     })
-    console.log(`${awsConfig.clusterName} cluster ready!\n`)
+    console.log(`${awsConfig.clusterName} cluster ready.\n`)
 
     return {
         ...awsConfig,
@@ -191,12 +213,13 @@ function run() {
     .then(createCluster)
     .then(function(awsConfig) {
         console.log("Done.  You can now start deploying services using deploy-ecs-service.js.")
-        console.log("Don't forget to update your config file with the following values:")
+        console.log("You'll need to deal with DNS and load balancer listeners manually.")
+        console.log("Don't forget to update your config file with the following values:")        
         console.log(JSON.stringify({
             "aws": {
                 "clusterName": awsConfig.clusterName,
                 "appName": awsConfig.appName,                
-                "appInternalPort": awsConfig.appInternalPort,
+                "appPorts": awsConfig.appPorts,
                 "region": awsConfig.region,
                 "clusterArn": awsConfig.ClusterArn,
                 "subnetIds": awsConfig.SubnetIds,        

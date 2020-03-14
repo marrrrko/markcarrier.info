@@ -45,14 +45,14 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: aws/ecs-taskdef.json
-        container-name: resume-container
+        container-name: websites-container
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: resume-serv
-        cluster: mark3
+        service: websites-serv
+        cluster: markcarrierinfo
         wait-for-service-stability: true
 

@@ -2,6 +2,7 @@ FROM node:10-alpine
 
 RUN apk update
 RUN apk add bash
+RUN apk add git
 
 #Switch to bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
