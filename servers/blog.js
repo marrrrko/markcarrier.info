@@ -183,7 +183,7 @@ const postTemplate = `
         {{/indexed}}
     </head>
     <body>
-        <div class="page-line"></div>
+        <!--<div class="page-line"></div>-->
         <div class="container">            
             <div class="row"><br /></div>
             <div class="row">
@@ -222,7 +222,7 @@ const indexTemplate = `
         <link rel="stylesheet" href="/style.css">
     </head>
     <body>
-        <div class="page-line"></div>
+        <!--<div class="page-line"></div>-->
         <div class="container">            
             <div class="row"><br /></div>
             <div class="row">
