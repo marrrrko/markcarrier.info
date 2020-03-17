@@ -60,6 +60,7 @@ body {
     font-size: 0.85rem;
 }
 
+/*
 @media screen and (prefers-color-scheme: light) {
     $blockquote-color: #707070;
     @import './node_modules/mini.css/src/flavors/mini-default.scss';
@@ -73,3 +74,6 @@ body {
     $fore-color: #FFFFFF;
     @import './mini-mark-dark.scss';
 }
+*/
+$blockquote-color: #707070;
+@import './node_modules/mini.css/src/flavors/mini-default.scss';
