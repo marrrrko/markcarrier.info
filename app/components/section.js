@@ -32,7 +32,10 @@ export default function Section(props) {
             {props.section.date != undefined && (
                 <RightHangingDate dateText={props.section.date} />
             )}
-            <Typography variant={headerLevel} paragraph={true}>{props.section.title}</Typography>            
+            <Typography variant={headerLevel} paragraph={true}>{props.section.title}</Typography>      
+            {props.section.subtitle != undefined && (
+                <Typography variant="subtitle2" paragraph={true}>{props.section.subtitle}</Typography>
+            )}      
             <Typography component="div">
                 {props.section.introBlock != undefined && (
                     <Typography variant="body1" paragraph={true}>{props.section.introBlock}</Typography>
