@@ -3,8 +3,11 @@ const startResumeServer = require('./servers/resume')
 const startLandingPageServer = require('./servers/landing-page')
 const startBlogServer = require('./servers/blog')
 
+const requestLogsRepo = require('./persistence/client-requests')
+
 async function init() {
     try {
+        await requestLogsRepo.setupTables();
         await startLandingPageServer(8888)
         console.log("Landing page app served on 8888")
         await startResumeServer(8889)

@@ -31,6 +31,7 @@ module.exports = async function startBlogServer(port) {
     return new Promise(function(resolve, reject) {
         try {
             let app = new Koa()
+            app.use(require('./utils/request-logger'))
             app.use(mount('/post/images', serve(srcDir + "/images")))
             app.use(cssAndApiMiddleware)
             app.use(mainContentMiddleware)

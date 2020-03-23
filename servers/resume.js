@@ -20,6 +20,7 @@ module.exports = async function startResumeServer(port) {
         return new Promise(function(resolve, reject) {
             try {
                 const app = new Koa()
+                app.use(require('./utils/request-logger'))
                 app.use(serve('dist', {  }))
                 app.use(mount('/assets', serve('dist/assets')))
                 
