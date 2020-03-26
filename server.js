@@ -7,7 +7,13 @@ const requestLogsRepo = require('./persistence/client-requests')
 
 async function init() {
     try {
-        await requestLogsRepo.setupTables();
+
+        console.log(process.env)
+        try {
+            await requestLogsRepo.setupTables();
+        } catch(err) {
+            console.error("Failed to setup request log repo", err)
+        }
         await startLandingPageServer(8888)
         console.log("Landing page app served on 8888")
         await startResumeServer(8889)

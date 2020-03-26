@@ -3,6 +3,8 @@ FROM node:10-alpine
 RUN apk update
 RUN apk add bash
 RUN apk add git
+RUN apk add curl
+RUN apk add jq
 
 #Switch to bash
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
@@ -17,4 +19,5 @@ ADD . /app
 
 RUN npm run build
 
-ENTRYPOINT ["node","server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["node","server.js"]

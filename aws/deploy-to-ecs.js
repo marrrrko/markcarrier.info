@@ -15,6 +15,7 @@ async function registerTaskDefinition(awsConfig) {
         family: `${awsConfig.appName}-taskdef`,
         networkMode: "awsvpc",
         executionRoleArn: "arn:aws:iam::879679279257:role/ecsTaskExecutionRole",
+        taskRoleArn: "arn:aws:iam::879679279257:role/AmazonECSTaskDynamoDBRole",
         containerDefinitions: [
             {
                 logConfiguration: {
