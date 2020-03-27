@@ -2,35 +2,49 @@ const AWS = require('aws-sdk')
 const config = require('config')
 const os = require('os');
 
-// AWS.config.update({
-//     endpoint: "http://localhost:8000"
-// })
+AWS.config.update({
+    endpoint: "http://localhost:8000"
+})
 const awsConfig = config.get("aws")
-const requestLogsTableName = `${awsConfig.clusterName}-request-logs`
+const requestHistoryTableName = `${awsConfig.clusterName}-request-history`
 
 async function setupTables() {
     const dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10', region: awsConfig.region })
     const existingTables = await dynamodb.listTables({}).promise()
-    
-    if(!existingTables.TableNames.includes(requestLogsTableName)) {
+
+    if (!existingTables.TableNames.includes(requestHistoryTableName)) {
         return createRequestHistoryTable(dynamodb)
     } else {
-        console.log(`${requestLogsTableName} table already created`)
+        console.log(`${requestHistoryTableName} table already created`)
         return Promise.resolve()
     }
 }
 
 async function createRequestHistoryTable(dynamodb) {
-    console.log(`Creating ${requestLogsTableName} table`)
+    console.log(`Creating ${requestHistoryTableName} table`)
     const params = {
-        TableName: requestLogsTableName,
-        KeySchema: [
-            { AttributeName: "yearMonth", KeyType: "HASH" },
-            { AttributeName: "serverStamp", KeyType: "RANGE" }
-        ],
+        TableName: requestHistoryTableName,
         AttributeDefinitions: [
-            { AttributeName: "yearMonth", AttributeType: "S" },
-            { AttributeName: "serverStamp", AttributeType: "S" }
+            { AttributeName: "requestDate", AttributeType: "S" },
+            { AttributeName: "serverTime", AttributeType: "S" },
+            { AttributeName: "requestUrl", AttributeType: "S" }
+        ],
+        KeySchema: [
+            { AttributeName: "requestDate", KeyType: "HASH" },
+            { AttributeName: "serverTime", KeyType: "RANGE" }
+        ],
+        LocalSecondaryIndexes: [
+            {
+                IndexName: 'RequestUrlIndex',
+                KeySchema: [
+                    { AttributeName: 'requestDate', KeyType: "HASH" },
+                    { AttributeName: 'requestUrl', KeyType: "RANGE" }
+                ],
+                Projection: {
+                    ProjectionType: "INCLUDE",
+                    NonKeyAttributes: ['requestInfo']
+                }
+            },
         ],
         ProvisionedThroughput: {
             ReadCapacityUnits: 5,
@@ -41,16 +55,17 @@ async function createRequestHistoryTable(dynamodb) {
     return dynamodb.createTable(params).promise()
 }
 
-async function saveRequestLogEntry(yearMonth, serverStamp, requestInfo) {
+async function saveRequestHistoryEntry(requestDate, serverTime, requestUrl, requestInfo) {
 
-    if(!yearMonth || yearMonth.length != 7 || !serverStamp || !requestInfo || !requestInfo.timestamp || !requestInfo.resource)
-        throw new Error("Invalid web request log entry. Data is missing.")
+    if (!requestDate || requestDate.length != 10 || !serverTime || !requestUrl || !requestInfo || !requestInfo.timestamp)
+        throw new Error("Invalid web request history entry. Data is missing.")
 
     const params = {
-        TableName: requestLogsTableName,
+        TableName: requestHistoryTableName,
         Item: {
-            yearMonth,
-            serverStamp,
+            requestDate: requestDate,
+            serverTime: serverTime,
+            requestUrl: requestUrl,
             requestInfo
         }
     }
@@ -60,56 +75,74 @@ async function saveRequestLogEntry(yearMonth, serverStamp, requestInfo) {
 }
 
 async function putSomething() {
-    
+
     const server = os.hostname()
     const timestamp = (new Date).toISOString()
-    yearMonth = timestamp.slice(0,7)
-    serverStamp = `${timestamp.slice(8)}@${server}`
+    const requestDate = timestamp.slice(0, 10)
+    const requestUrl = "https://wonderfulplace.com/something/good/?badParts=removed"
+    const serverTime = `${timestamp.slice(11)}@${server}`
 
-    return saveRequestLogEntry(
-        yearMonth,
-        serverStamp,
+    return saveRequestHistoryEntry(
+        requestDate,
+        serverTime,
+        requestUrl,
         {
             timestamp: timestamp,
             server: server,
-            sourceIp: "212.253.126.111",
-            resource: "something/good/?badParts=removed",
+            clientIps: ["212.253.126.111"],            
             verb: "GET",
             userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36"
         })
 }
 
-async function getAllLogEntriesForMonth(year, month) {
+async function getAllEntriesForDay(year, month, day) {
     const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: awsConfig.region })
     const params = {
-        TableName: requestLogsTableName,
-        KeyConditionExpression: "yearMonth = :ym",
+        TableName: requestHistoryTableName,
+        KeyConditionExpression: "requestDate = :ymd",
         ExpressionAttributeValues: {
-            ":ym": `${year}-${("0" + month).slice(-2)}`
+            ":ymd": `${year}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}`
+        }
+    }
+    return docClient.query(params).promise()
+}
+
+async function getUrlEntriesForDay(year, month, day, urlStart) {
+    const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: awsConfig.region })
+    const params = {
+        TableName: requestHistoryTableName,
+        IndexName: "RequestUrlIndex",
+        KeyConditionExpression: "requestDate = :ymd and begins_with(requestUrl, :url)",
+        ExpressionAttributeValues: {
+            ":ymd": `${year}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}`,
+            ":url": urlStart
         }
     }
     return docClient.query(params).promise()
 }
 
 async function getSomething() {
-    return getAllLogEntriesForMonth((new Date).getYear() + 1900, (new Date).getMonth() + 1)
+    const now = new Date()
+    //return getAllEntriesForDay(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
+    return getUrlEntriesForDay(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate(), "http:")
 }
 
 async function runTest() {
-    await setupTables()    
-    //await putSomething()
-    //console.log("Something was put")
+    await setupTables()
+    await putSomething()
+    console.log("Something was put")
     result = await getSomething()
     console.log(JSON.stringify(result, null, " "))
 }
 
-// runTest()
-// .catch((err) => {
-//     console.error("Couldn't do it", err)
-// })
+runTest()
+.catch((err) => {
+    console.error("Couldn't do it", err)
+})
 
 module.exports = {
     setupTables,
-    saveRequestLogEntry,
-    getAllLogEntriesForMonth
+    saveRequestHistoryEntry,
+    getAllEntriesForDay: getAllEntriesForDay,
+    getUrlEntriesForDay: getUrlEntriesForDay
 }

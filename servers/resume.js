@@ -33,7 +33,7 @@ module.exports = async function startResumeServer(port) {
                             healthy: true
                         }
                     } else {
-                        console.log(`Serving resume app`)
+                        //console.log(`Serving resume app`)
                         await send(ctx, "./dist/index.html")
                     }
                 })

@@ -16,7 +16,7 @@ module.exports =  async function startLandingPageServer(port) {
                         healthy: true
                     }
                 } else {
-                    console.log(`Serving landing page`)
+                    //console.log(`Serving landing page`)
                     await send(ctx, "./dist/assets/home.html")
                 }
             })

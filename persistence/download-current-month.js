@@ -4,9 +4,12 @@ const fs = require('fs')
 const writeFile = util.promisify(fs.writeFile)
 
 const now = new Date
-clientRequests.getAllLogEntriesForMonth(now.getFullYear(), now.getMonth() + 1)
+clientRequests.getAllEntriesForDay(now.getUTCFullYear(), now.getUTCMonth() + 1, now.getUTCDate())
 .then(function(data) {
-    return writeFile("./this_month.json", JSON.stringify(data,null,"  "))
+    const interestingEntries = data.Items.filter(item => 
+        item.requestInfo.userAgent !== "ELB-HealthChecker/2.0" &&
+        item.requestInfo.userAgent !== "AWS Security Scanner")
+    return writeFile("./today.json", JSON.stringify(interestingEntries,null,"  "))
 })
 .then(function() {
     console.log("Done")

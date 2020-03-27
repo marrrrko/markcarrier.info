@@ -5,35 +5,35 @@ async function logRequest(ctx, next) {
 
     try {
         const userAgent = ctx.request.headers["user-agent"]
-        const isHealthCheck = userAgent && userAgent === "ELB-HealthChecker/2.0"
+        const shouldBeLogged = userAgent 
+            && userAgent !== "ELB-HealthChecker/2.0"
+            && userAgent !== "AWS Security Scanner"
+            
 
-        if(!isHealthCheck) {
+        if(shouldBeLogged) {
             const server = os.hostname()
             const timestamp = (new Date).toISOString()
-            yearMonth = timestamp.slice(0,7)
-            serverStamp = `${timestamp.slice(8)}@${server}`
+            const requestDate = timestamp.slice(0,10)
+            const serverTime = `${timestamp.slice(11)}@${server}`
+            clientIps = [ctx.ip].concat(ctx.ips).concat(ctx.request.headers["X-Forwarded-For"])
+
             const requestInfo = {
                 timestamp: timestamp,
-                server: server,
-                sourceIp: ctx.ips.length > 0 ? ctx.ips[ctx.ips.length - 1] : ctx.ip,
-                resource: ctx.request.href,
+                clientIps: clientIps,
                 verb: ctx.request.method,
                 userAgent: userAgent || "none"
             }
 
             //We don't await.  Let it run in the background.
-            requestLogsRepo.saveRequestLogEntry(
-                yearMonth,
-                serverStamp,
+            requestLogsRepo.saveRequestHistoryEntry(
+                requestDate,                
+                serverTime,
+                ctx.request.href,
                 requestInfo
             )
         }
     } catch(err) {
-        console.error("Failed to log request", {
-            yearMonth,
-            serverStamp,
-            requestInfo
-        })
+        console.error("Failed to log request", err)
     }
 
     await next()
