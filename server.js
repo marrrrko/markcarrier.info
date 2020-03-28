@@ -8,7 +8,7 @@ const requestLogsRepo = require('./persistence/client-requests')
 async function init() {
     try {
 
-        console.log(process.env)
+        //console.log(process.env)
         try {
             await requestLogsRepo.setupTables();
         } catch(err) {

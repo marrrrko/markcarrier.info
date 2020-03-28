@@ -2,9 +2,9 @@ const AWS = require('aws-sdk')
 const config = require('config')
 const os = require('os');
 
-AWS.config.update({
-    endpoint: "http://localhost:8000"
-})
+// AWS.config.update({
+//     endpoint: "http://localhost:8000"
+// })
 const awsConfig = config.get("aws")
 const requestHistoryTableName = `${awsConfig.clusterName}-request-history`
 
@@ -135,10 +135,10 @@ async function runTest() {
     console.log(JSON.stringify(result, null, " "))
 }
 
-runTest()
-.catch((err) => {
-    console.error("Couldn't do it", err)
-})
+// runTest()
+// .catch((err) => {
+//     console.error("Couldn't do it", err)
+// })
 
 module.exports = {
     setupTables,
