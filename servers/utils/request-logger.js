@@ -1,4 +1,4 @@
-const requestLogsRepo = require('../../persistence/client-requests')
+const requestHistoryRepo = require('../../persistence/client-requests')
 const os = require('os')
 
 async function logRequest(ctx, next) {
@@ -25,7 +25,7 @@ async function logRequest(ctx, next) {
             }
 
             //We don't await.  Let it run in the background.
-            requestLogsRepo.saveRequestHistoryEntry(
+            requestHistoryRepo.saveRequestHistoryEntry(
                 requestDate,                
                 serverTime,
                 ctx.request.href,

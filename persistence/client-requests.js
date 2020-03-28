@@ -1,12 +1,17 @@
 const AWS = require('aws-sdk')
 const config = require('config')
 const os = require('os');
-
-// AWS.config.update({
-//     endpoint: "http://localhost:8000"
-// })
 const awsConfig = config.get("aws")
+const NodeCache = require("node-cache");
+const historyCache = new NodeCache();
+
 const requestHistoryTableName = `${awsConfig.clusterName}-request-history`
+
+if (awsConfig.dynamodbEndpoint) {
+    AWS.config.update({
+        endpoint: awsConfig.dynamodbEndpoint
+    })
+}
 
 async function setupTables() {
     const dynamodb = new AWS.DynamoDB({ apiVersion: '2012-08-10', region: awsConfig.region })
@@ -89,22 +94,37 @@ async function putSomething() {
         {
             timestamp: timestamp,
             server: server,
-            clientIps: ["212.253.126.111"],            
+            clientIps: ["212.253.126.111"],
             verb: "GET",
             userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36"
         })
 }
 
 async function getAllEntriesForDay(year, month, day) {
-    const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: awsConfig.region })
-    const params = {
-        TableName: requestHistoryTableName,
-        KeyConditionExpression: "requestDate = :ymd",
-        ExpressionAttributeValues: {
-            ":ymd": `${year}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}`
+
+    let entries = null;
+
+    const key = `${year}-${("0" + month).slice(-2)}-${("0" + day).slice(-2)}`
+    const cachedValue = historyCache.get(key)
+
+    if (!cachedValue) {
+        const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: awsConfig.region })
+        const params = {
+            TableName: requestHistoryTableName,
+            KeyConditionExpression: "requestDate = :ymd",
+            ExpressionAttributeValues: {
+                ":ymd": key
+            }
         }
+        entries = await docClient.query(params).promise()
+        let ttl = 5
+        if(new Date(year, month - 1, day) < new Date())
+           ttl = 0
+        historyCache.set(key, entries, ttl)
+    } else {
+        entries = cachedValue
     }
-    return docClient.query(params).promise()
+    return entries
 }
 
 async function getUrlEntriesForDay(year, month, day, urlStart) {
