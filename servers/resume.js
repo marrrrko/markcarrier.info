@@ -38,6 +38,9 @@ module.exports = async function startResumeServer(port) {
                                 ctx.body = {
                                     healthy: true
                                 }
+                            } else if (ctx.path.startsWith("/api/")) {
+                                ctx.status = 404
+                                ctx.body = { code: 404, message: "Nada" }
                             } else {
                                 //console.log(`Serving resume app`)
                                 await send(ctx, "./dist/index.html")
