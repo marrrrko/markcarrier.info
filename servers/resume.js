@@ -107,13 +107,13 @@ async function getMonthlyTraffic(ctx) {
         next: { href: `${ctx.origin}${ctx.path}?year=${nextYear}&month=${nextMonth}${urlQuery}`},
         previous: { href: `${ctx.origin}${ctx.path}?year=${previousYear}&month=${previousMonth}${urlQuery}`},
         year: year,
-        month: month,
+        month: month,        
+        total: allDaysTotals.reduce((acc, dailyTotal) => { return acc + dailyTotal.total}, 0),
+        dailyTotals: allDaysTotals.filter(dailyTotal => dailyTotal.total > 0),
         urls: urls.map(url => ({
             value: url,
             href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}&url=${encodeURIComponent(url)}`
-        })),
-        total: allDaysTotals.reduce((acc, dailyTotal) => { return acc + dailyTotal.total}, 0),
-        dailyTotals: allDaysTotals,
+        }))
     }
 }
 

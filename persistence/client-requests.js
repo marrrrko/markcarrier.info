@@ -108,6 +108,7 @@ async function getAllEntriesForDay(year, month, day) {
     const cachedValue = historyCache.get(key)
 
     if (!cachedValue) {
+        //console.log("Fetching " + key)
         const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: awsConfig.region })
         const params = {
             TableName: requestHistoryTableName,
@@ -118,7 +119,10 @@ async function getAllEntriesForDay(year, month, day) {
         }
         entries = await docClient.query(params).promise()
         let ttl = 5
-        if(new Date(year, month - 1, day) < new Date())
+        const requestDate = new Date(year, month - 1, day)
+        const edgeDate = new Date(+requestDate + 2 *86400000)
+        const now = new Date()
+        if(edgeDate < now)
            ttl = 0
         historyCache.set(key, entries, ttl)
     } else {
