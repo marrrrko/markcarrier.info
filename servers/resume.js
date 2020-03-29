@@ -60,8 +60,9 @@ module.exports = async function startResumeServer(port) {
 
 async function getTraffic(ctx) {
     const now = new Date
-    const year = ctx.request.query["year"] || now.getUTCFullYear()
-    const month = ctx.request.query["month"] || now.getUTCMonth() + 1
+    const year = parseInt(ctx.request.query["year"] || now.getUTCFullYear())
+    const month = parseInt(ctx.request.query["month"] || now.getUTCMonth() + 1)
+    const urlFilter = ctx.request.query["url"]
 
     if (year < 1000 || year > 5000)
         throw new Error("Invalid year")
@@ -73,12 +74,13 @@ async function getTraffic(ctx) {
     const fetchAllDaysOfMonth = days.map(day => {
         return requestHistoryRepo.getAllEntriesForDay(year, month, day)
         .then(function(queryResult) {
+            const filteredRequests = queryResult.Items.filter(i => !urlFilter || i.requestUrl == urlFilter)
             return {
                 year,
                 month,
                 day,
-                requests: queryResult.Items,
-                total: queryResult.Items.length || 0
+                requests: filteredRequests,
+                total: filteredRequests.length || 0
             }
         })
     })
@@ -90,5 +92,26 @@ async function getTraffic(ctx) {
         total: dayEntries.total
     }))
 
-    return JSON.stringify(allDaysTotals,null,1)
+    const urls = _.uniq(allDays.reduce((acc, dayEntries) => {
+        return acc.concat(dayEntries.requests.map(e => e.requestUrl))
+    }, []))
+
+    const nextMonth = (month == 12) ? 1 : month + 1
+    const nextYear = (nextMonth > 1) ? year : year + 1
+    const previousMonth = (month == 1) ? 12 : month - 1
+    const previousYear = (previousMonth < 12) ? year : year - 1
+
+    const urlQuery = urlFilter ? `&url=${encodeURIComponent(urlFilter)}` : ""
+
+    return {
+        self: { href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}${urlQuery}`},        
+        next: { href: `${ctx.origin}${ctx.path}?year=${nextYear}&month=${nextMonth}${urlQuery}`},
+        previous: { href: `${ctx.origin}${ctx.path}?year=${previousYear}&month=${previousMonth}${urlQuery}`},
+        urls: urls.map(url => ({
+            value: url,
+            href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}&url=${encodeURIComponent(url)}`
+        })),
+        total: allDaysTotals.reduce((acc, dailyTotal) => { return acc + dailyTotal.total}, 0),
+        dailyTotals: allDaysTotals,
+    }
 }
