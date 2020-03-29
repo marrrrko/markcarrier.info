@@ -30,8 +30,10 @@ module.exports = async function startResumeServer(port) {
                             await next()
                             if (ctx.path == "/api/profile" && ctx.method == "GET") {
                                 ctx.body = resume
-                            } else if (ctx.path == "/api/traffic" && ctx.method == "GET") {
-                                ctx.body = await getTraffic(ctx)
+                            } else if (ctx.path == "/api/traffic/monthly" && ctx.method == "GET") {
+                                ctx.body = await getMonthlyTraffic(ctx)
+                            } else if (ctx.path == "/api/traffic/daily" && ctx.method == "GET") {
+                                ctx.body = await getDailyTraffic(ctx)
                             } else if (ctx.path == "/api/health" && ctx.method == "GET") {
                                 ctx.body = {
                                     healthy: true
@@ -41,8 +43,9 @@ module.exports = async function startResumeServer(port) {
                                 await send(ctx, "./dist/index.html")
                             }
                         } catch (err) {
+                            console.error(err)
                             ctx.status = 500
-                            ctx.body = err.toString()
+                            ctx.body = `500: ${err.toString()}`
                         }
                     })
 
@@ -58,11 +61,12 @@ module.exports = async function startResumeServer(port) {
         })
 }
 
-async function getTraffic(ctx) {
+async function getMonthlyTraffic(ctx) {
     const now = new Date
     const year = parseInt(ctx.request.query["year"] || now.getUTCFullYear())
     const month = parseInt(ctx.request.query["month"] || now.getUTCMonth() + 1)
     const urlFilter = ctx.request.query["url"]
+    const urlQuery = urlFilter ? `&url=${encodeURIComponent(urlFilter)}` : ""
 
     if (year < 1000 || year > 5000)
         throw new Error("Invalid year")
@@ -76,20 +80,17 @@ async function getTraffic(ctx) {
         .then(function(queryResult) {
             const filteredRequests = queryResult.Items.filter(i => !urlFilter || i.requestUrl == urlFilter)
             return {
-                year,
-                month,
                 day,
                 requests: filteredRequests,
-                total: filteredRequests.length || 0
+                total: filteredRequests.length || 0                
             }
         })
     })
     const allDays = await Promise.all(fetchAllDaysOfMonth)
     const allDaysTotals = allDays.map(dayEntries => ({
-        year: dayEntries.year,
-        month: dayEntries.month,
         day: dayEntries.day,
-        total: dayEntries.total
+        total: dayEntries.total,
+        href: `${ctx.origin}/api/traffic/daily?year=${year}&month=${month}&day=${dayEntries.day}${urlQuery}`
     }))
 
     const urls = _.uniq(allDays.reduce((acc, dayEntries) => {
@@ -99,14 +100,14 @@ async function getTraffic(ctx) {
     const nextMonth = (month == 12) ? 1 : month + 1
     const nextYear = (nextMonth > 1) ? year : year + 1
     const previousMonth = (month == 1) ? 12 : month - 1
-    const previousYear = (previousMonth < 12) ? year : year - 1
-
-    const urlQuery = urlFilter ? `&url=${encodeURIComponent(urlFilter)}` : ""
+    const previousYear = (previousMonth < 12) ? year : year - 1    
 
     return {
         self: { href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}${urlQuery}`},        
         next: { href: `${ctx.origin}${ctx.path}?year=${nextYear}&month=${nextMonth}${urlQuery}`},
         previous: { href: `${ctx.origin}${ctx.path}?year=${previousYear}&month=${previousMonth}${urlQuery}`},
+        year: year,
+        month: month,
         urls: urls.map(url => ({
             value: url,
             href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}&url=${encodeURIComponent(url)}`
@@ -114,4 +115,38 @@ async function getTraffic(ctx) {
         total: allDaysTotals.reduce((acc, dailyTotal) => { return acc + dailyTotal.total}, 0),
         dailyTotals: allDaysTotals,
     }
+}
+
+async function getDailyTraffic(ctx) {
+    const now = new Date
+    const year = parseInt(ctx.request.query["year"] || now.getUTCFullYear())
+    const month = parseInt(ctx.request.query["month"] || now.getUTCMonth() + 1)
+    const day = parseInt(ctx.request.query["day"] || now.getUTCDate())    
+    const urlFilter = ctx.request.query["url"]
+
+    if (year < 1000 || year > 5000)
+        throw new Error("Invalid year")
+
+    if (month < 1 || month > 12)
+        throw new Error("Invalid month")
+
+    if (day < 1 || day > 31)
+        throw new Error("Invalid day")
+
+    const hits = await requestHistoryRepo.getAllEntriesForDay(year, month, day)
+
+    const filteredRequests = hits.Items
+        .filter(i => !urlFilter || i.requestUrl == urlFilter)
+        .map(request => ({
+            ...request,
+            href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}&day=${day}&url=${encodeURIComponent(request.requestUrl)}`
+        }))
+    return {
+        year,
+        month,
+        day,
+        requests: filteredRequests,
+        total: filteredRequests.length || 0
+    }
+
 }
