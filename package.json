@@ -41,7 +41,6 @@
     "config": "^3.3.1",
     "front-matter": "^3.1.0",
     "fs-extra": "^8.1.0",
-    "geo-from-ip": "^2.0.0",
     "koa": "^2.11.0",
     "koa-mount": "^4.0.0",
     "koa-send": "^5.0.0",
