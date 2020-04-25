@@ -63,8 +63,6 @@ async function mainContentMiddleware(ctx, next) {
     const matchedUrlPostId = postData.postIdsByUrl[posturl]
     if(!matchedPost && matchedUrlPostId) {
         matchedPost = postData.postsById[matchedUrlPostId]
-        if(!matchedPost.indexed) //Only indexed posts can be accessed by url
-            matchedPost = null
     }            
     
     if(ctx.path.startsWith("/post/") && matchedPost && matchedPost.published) {                    
@@ -80,7 +78,7 @@ async function mainContentMiddleware(ctx, next) {
 }
 
 function renderIndex(postData) {
-    const indexedPosts = Object.values(postData.postsById).filter(post => post.published)
+    const indexedPosts = Object.values(postData.postsById).filter(post => post.published && post.indexed)
     return mustache.render(indexTemplate, { indexedPosts })
 }
 
@@ -96,17 +94,18 @@ async function loadPostData() {
     const posts = postFiles.map(postfile => frontMatter(postfile))
     const postsById = posts.reduce(
         function(dict, post) {
-            const  dateString = moment(post.attributes.date).format("MMMM Do YYYY")
+            const dateString = moment(post.attributes.date).format("MMMM Do YYYY")
+            const defaultUrl = post.attributes.urls && post.attributes.urls.length ? `/post/${post.attributes.urls[0]}` : null
             return {
                 ...dict,                
                 [post.attributes.id.toUpperCase()]: { 
                     ...post.attributes,
                     dateString: dateString,
-                    url: `/post/${post.attributes.urls[0]}`,
+                    url: defaultUrl,
                     html: mustache.render(postTemplate, { 
                         ...post.attributes,
                         dateString: dateString,                        
-                        html: marked(post.body)
+                        html: getPostHtml(post.body)
                     })
                 }
             }
@@ -130,6 +129,11 @@ async function loadPostData() {
         postsById,
         postIdsByUrl
     }
+}
+
+function getPostHtml(postMarkdown) {
+
+    return marked(postMarkdown).replace(/<pre><code>/g,"<pre>").replace(/<\/code><\/pre>/g,"</pre>")
 }
 
 async function buildCSS() {

@@ -57,7 +57,13 @@ async function createRequestHistoryTable(dynamodb) {
         }
     }
 
-    return dynamodb.createTable(params).promise()
+    try {
+        dynamodb.createTable(params).promise()
+    } catch(error) {
+        throw new Error(error)
+    }
+
+    return
 }
 
 async function saveRequestHistoryEntry(requestDate, serverTime, requestUrl, requestInfo) {
@@ -74,9 +80,13 @@ async function saveRequestHistoryEntry(requestDate, serverTime, requestUrl, requ
             requestInfo
         }
     }
-
-    const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: awsConfig.region })
-    return docClient.put(params).promise()
+    try {
+        const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: awsConfig.region })
+        await docClient.put(params).promise()
+    } catch(error) {
+        throw new Error(error)        
+    }
+    return
 }
 
 async function putSomething() {

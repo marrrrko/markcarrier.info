@@ -106,7 +106,7 @@ async function getMonthlyTraffic(ctx) {
     const previousYear = (previousMonth < 12) ? year : year - 1    
 
     return {
-        self: { href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}${urlQuery}`},        
+        self: { href: `${ctx.origin}${ctx.path}?year=${year}&month=${month}${urlQuery}`},
         next: { href: `${ctx.origin}${ctx.path}?year=${nextYear}&month=${nextMonth}${urlQuery}`},
         previous: { href: `${ctx.origin}${ctx.path}?year=${previousYear}&month=${previousMonth}${urlQuery}`},
         year: year,
