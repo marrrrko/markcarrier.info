@@ -1,5 +1,6 @@
 const requestHistoryRepo = require('../../persistence/client-requests')
 const os = require('os')
+const geoip = require('geo-from-ip')
 
 async function logRequest(ctx, next) {
 
@@ -15,11 +16,30 @@ async function logRequest(ctx, next) {
             const timestamp = (new Date).toISOString()
             const requestDate = timestamp.slice(0,10)
             const serverTime = `${timestamp.slice(11)}@${server}`
-            clientIps = [ctx.ip].concat(ctx.ips).concat(ctx.request.headers["X-Forwarded-For"])
+            const clientIp = ctx.headers["x-forwarded-for"] || ctx.ip
+            let from = "n/a"
+            if(clientIp) {
+                try {
+                    const geo = geoip.allData(clientIp)
+                    if(geo) {
+                        from = {
+                            continent: geo.continent,
+                            country: geo.country,
+                            state: geo.state,
+                            city: geo.city,
+                            postal: geo.postal
+                        }
+                    }
+                } catch(geoErr) {
+                    console.error("Failed to retrieve geo from ip", geoErr)
+                }
+            }
 
             const requestInfo = {
                 timestamp: timestamp,
-                clientIps: clientIps,
+                from,
+                referer: ctx.headers["referer"],
+                acceptedLanguages: ctx.headers["accept-language"],
                 verb: ctx.request.method,
                 userAgent: userAgent || "none"
             }

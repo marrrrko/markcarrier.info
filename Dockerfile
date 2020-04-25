@@ -11,6 +11,8 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 #NPM Dependencies (split for caching performance)
 COPY package.json /tmp/package.json
+RUN export MAXMIND_LICENSE_KEY="qAmlvLbThW519p1I"
+RUN echo "Key = $MAXMIND_LICENSE_KEY"
 RUN cd /tmp && npm install
 RUN mkdir -p /app && cp -a /tmp/node_modules /app/
 

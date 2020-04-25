@@ -1,7 +1,7 @@
 #!/bin/bash
 
 IMAGE_NAME="markcarrier.info"
-docker build -t $IMAGE_NAME .
+docker build --build-arg MAXMIND_LICENSE_KEY -t $IMAGE_NAME .
 ID=$(docker image ls -q|head -1)
 
 # Github
