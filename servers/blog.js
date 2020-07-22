@@ -159,6 +159,7 @@ async function loadPostsFromSource() {
     return Promise.all(markdownFileLoads)
 }
 
+const delay = time => new Promise(res=>setTimeout(res,time));
 async function loadSrcFiles() {    
     const srcDirExists = await fs.exists(srcDir)
     if(!srcDirExists) {
@@ -166,11 +167,22 @@ async function loadSrcFiles() {
     }
     const git = require('simple-git/promise')(srcDir)        
     let files = await fs.readdir(srcDir)
-    if(!files.length) {
-        await git.clone(remote, srcDir)
-        files = await fs.readdir(srcDir)
-    } else {
-        await git.pull()
+    let gotFiles = false;
+    while(!gotFiles) {
+        try {
+            if(!files.length) {
+                await git.clone(remote, srcDir)
+                files = await fs.readdir(srcDir)
+            } else {
+                await git.pull()
+            }
+            gotFiles = true;
+        } catch(gitErr) {
+            console.log("Failed to get files from github.")
+            console.error(gitErr)
+            console.log("Will retry in 30 seconds")
+            await delay(30000)
+        }
     }
 
     return files
