@@ -167,8 +167,9 @@ async function loadSrcFiles() {
     }
     const git = require('simple-git/promise')(srcDir)        
     let files = await fs.readdir(srcDir)
-    let gotFiles = false;
-    while(!gotFiles) {
+    let keepTrying = true;
+    let attempt = 1
+    while(keepTrying) {
         try {
             if(!files.length) {
                 await git.clone(remote, srcDir)
@@ -176,12 +177,19 @@ async function loadSrcFiles() {
             } else {
                 await git.pull()
             }
-            gotFiles = true;
-        } catch(gitErr) {
+            keepTrying = false
+        } catch(gitErr) {            
             console.log("Failed to get files from github.")
             console.error(gitErr)
-            console.log("Will retry in 30 seconds")
-            await delay(30000)
+
+            if(attempt == 5) {
+                console.log("Giving up after 5 attempts.")
+                keepTrying = false
+            } else {
+                attempt++
+                console.log("Will retry in 30 seconds")
+                await delay(30000)
+            }
         }
     }
 
