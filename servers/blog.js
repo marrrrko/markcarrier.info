@@ -6,194 +6,193 @@ const _ = require('lodash')
 const fs = require('fs-extra')
 const frontMatter = require('front-matter')
 const marked = require('marked')
-const renderer = new marked.Renderer();
-renderer.link = function(href, title, text) {
-    const link = marked.Renderer.prototype.link.apply(this, arguments);
-    return link.replace("<a","<a target='_blank'");
+const renderer = new marked.Renderer()
+renderer.link = function (href, title, text) {
+  const link = marked.Renderer.prototype.link.apply(this, arguments)
+  return link.replace('<a', "<a target='_blank'")
 }
 marked.setOptions({ renderer: renderer })
-const mustache = require('mustache');
-const sass = require('node-sass');
+const mustache = require('mustache')
+const sass = require('node-sass')
 
-const srcDir = __dirname + "/../writings-src"
-const remote = "https://github.com/MarkCarrier/public-writings.git"
-const sassSrc = "./mini-mark.scss"
+const srcDir = __dirname + '/../writings-src'
+const remote = 'https://github.com/MarkCarrier/public-writings.git'
+const sassSrc = './mini-mark.scss'
 
 let css = null
 let postData = null
 
-module.exports = async function startBlogServer(port) {
-    
-    css = await buildCSS()    
-    postData = await loadPostData()
-    setInterval(reloadPosts, 15 * 1000 * 60)
+module.exports = async function createBlogApp() {
+  css = await buildCSS()
+  postData = await loadPostData()
+  setInterval(reloadPosts, 15 * 1000 * 60)
 
-    return new Promise(function(resolve, reject) {
-        try {
-            let app = new Koa()
-            app.use(require('./utils/request-logger'))
-            app.use(mount('/post/images', serve(srcDir + "/images")))
-            app.use(cssAndApiMiddleware)
-            app.use(mainContentMiddleware)
-            app.listen(port, resolve)
-        } catch(err) {
-            console.error(err)
-            reject(err)
-        }
-    })
+  let app = new Koa()
+  app.use(require('./utils/request-logger'))
+  app.use(mount('/post/images', serve(srcDir + '/images')))
+  app.use(cssAndApiMiddleware)
+  app.use(mainContentMiddleware)
+
+  return app
 }
 
 async function cssAndApiMiddleware(ctx, next) {
-    if(ctx.path == "/api/health" && ctx.method == "GET") {
-        ctx.body = {
-            healthy: true
-        }
-    } else if(ctx.path == "/style.css") {
-        ctx.type = 'text/css'              
-        ctx.body = css.css
-    } else {
-        await next()
+  if (ctx.path == '/api/health' && ctx.method == 'GET') {
+    ctx.body = {
+      healthy: true
     }
+  } else if (ctx.path == '/style.css') {
+    ctx.type = 'text/css'
+    ctx.body = css.css
+  } else {
+    await next()
+  }
 }
 
 async function mainContentMiddleware(ctx, next) {
-    const posturl = ctx.path.replace("/post/","").toUpperCase()
-    
-    let matchedPost = postData.postsById[posturl]
-    const matchedUrlPostId = postData.postIdsByUrl[posturl]
-    if(!matchedPost && matchedUrlPostId) {
-        matchedPost = postData.postsById[matchedUrlPostId]
-    }            
-    
-    if(ctx.path.startsWith("/post/") && matchedPost && matchedPost.published) {                    
-        ctx.type = 'text/html';              
-        ctx.body = matchedPost.html
-    } else if(ctx.path == null || ctx.path === "" || ctx.path === "/") {
-        ctx.type = 'text/html';              
-        ctx.body = renderIndex(postData)
-    } else {
-        ctx.status = 404
-        ctx.body = `404 Nada`
-    }
+  const posturl = ctx.path.replace('/post/', '').toUpperCase()
+
+  let matchedPost = postData.postsById[posturl]
+  const matchedUrlPostId = postData.postIdsByUrl[posturl]
+  if (!matchedPost && matchedUrlPostId) {
+    matchedPost = postData.postsById[matchedUrlPostId]
+  }
+
+  if (ctx.path.startsWith('/post/') && matchedPost && matchedPost.published) {
+    ctx.type = 'text/html'
+    ctx.body = matchedPost.html
+  } else if (ctx.path == null || ctx.path === '' || ctx.path === '/') {
+    ctx.type = 'text/html'
+    ctx.body = renderIndex(postData)
+  } else {
+    ctx.status = 404
+    ctx.body = `404 Nada`
+  }
 }
 
 function renderIndex(postData) {
-    const indexedPosts = Object.values(postData.postsById).filter(post => post.published && post.indexed)
-    return mustache.render(indexTemplate, { indexedPosts })
+  const indexedPosts = Object.values(postData.postsById).filter(
+    (post) => post.published && post.indexed
+  )
+  return mustache.render(indexTemplate, { indexedPosts })
 }
 
 function reloadPosts() {
-    loadPostData()
-    .then(function(updatedPosts) {
-        postData = updatedPosts
-    })
+  loadPostData().then(function (updatedPosts) {
+    postData = updatedPosts
+  })
 }
 
 async function loadPostData() {
-    const postFiles = await loadPostsFromSource()
-    const posts = postFiles.map(postfile => frontMatter(postfile))
-    const postsById = posts.reduce(
-        function(dict, post) {
-            const dateString = moment(post.attributes.date).format("MMMM Do YYYY")
-            const defaultUrl = post.attributes.urls && post.attributes.urls.length ? `/post/${post.attributes.urls[0]}` : null
-            return {
-                ...dict,                
-                [post.attributes.id.toUpperCase()]: { 
-                    ...post.attributes,
-                    dateString: dateString,
-                    url: defaultUrl,
-                    html: mustache.render(postTemplate, { 
-                        ...post.attributes,
-                        dateString: dateString,                        
-                        html: getPostHtml(post.body)
-                    })
-                }
-            }
-        },
-        {})
-
-    const urlGroups = Object.values(postsById)
-        .map(p => p.urls.map(u => ({ 
-            url: u.toUpperCase(),
-            postId: p.id.toUpperCase()
-        })))
-    const urls = _.flatten(urlGroups)
-    const postIdsByUrl = urls.reduce(
-        (dict, urlIdMapping) => ({
-            ...dict,
-            [urlIdMapping.url]: urlIdMapping.postId
-        }),
-        {})
-
+  const postFiles = await loadPostsFromSource()
+  const posts = postFiles.map((postfile) => frontMatter(postfile))
+  const postsById = posts.reduce(function (dict, post) {
+    const dateString = moment(post.attributes.date).format('MMMM Do YYYY')
+    const defaultUrl =
+      post.attributes.urls && post.attributes.urls.length
+        ? `/post/${post.attributes.urls[0]}`
+        : null
     return {
-        postsById,
-        postIdsByUrl
+      ...dict,
+      [post.attributes.id.toUpperCase()]: {
+        ...post.attributes,
+        dateString: dateString,
+        url: defaultUrl,
+        html: mustache.render(postTemplate, {
+          ...post.attributes,
+          dateString: dateString,
+          html: getPostHtml(post.body)
+        })
+      }
     }
+  }, {})
+
+  const urlGroups = Object.values(postsById).map((p) =>
+    p.urls.map((u) => ({
+      url: u.toUpperCase(),
+      postId: p.id.toUpperCase()
+    }))
+  )
+  const urls = _.flatten(urlGroups)
+  const postIdsByUrl = urls.reduce(
+    (dict, urlIdMapping) => ({
+      ...dict,
+      [urlIdMapping.url]: urlIdMapping.postId
+    }),
+    {}
+  )
+
+  return {
+    postsById,
+    postIdsByUrl
+  }
 }
 
 function getPostHtml(postMarkdown) {
-
-    return marked(postMarkdown).replace(/<pre><code>/g,"<pre>").replace(/<\/code><\/pre>/g,"</pre>")
+  return marked(postMarkdown)
+    .replace(/<pre><code>/g, '<pre>')
+    .replace(/<\/code><\/pre>/g, '</pre>')
 }
 
 async function buildCSS() {
-    return new Promise(function(resolve, reject) {
-        sass.render({
-            file: sassSrc    
-        }, (err, result) => {
-            if(err)
-                reject(err)
-            else
-                resolve(result)
-        })
-    })
+  return new Promise(function (resolve, reject) {
+    sass.render(
+      {
+        file: sassSrc
+      },
+      (err, result) => {
+        if (err) reject(err)
+        else resolve(result)
+      }
+    )
+  })
 }
 
 async function loadPostsFromSource() {
-    const filenames = await loadSrcFiles()
-    const markdownFilenames = filenames.filter(f => f.endsWith(".md"))
-    const markdownFileLoads = markdownFilenames.map(async f => {
-        return fs.readFile(`${srcDir}/${f}`, 'utf-8')
-    })
+  const filenames = await loadSrcFiles()
+  const markdownFilenames = filenames.filter((f) => f.endsWith('.md'))
+  const markdownFileLoads = markdownFilenames.map(async (f) => {
+    return fs.readFile(`${srcDir}/${f}`, 'utf-8')
+  })
 
-    return Promise.all(markdownFileLoads)
+  return Promise.all(markdownFileLoads)
 }
 
-const delay = time => new Promise(res=>setTimeout(res,time));
-async function loadSrcFiles() {    
-    const srcDirExists = await fs.exists(srcDir)
-    if(!srcDirExists) {
-        await fs.mkdir(srcDir)
-    }
-    const git = require('simple-git/promise')(srcDir)        
-    let files = await fs.readdir(srcDir)
-    let keepTrying = true;
-    let attempt = 1
-    while(keepTrying) {
-        try {
-            if(!files.length) {
-                await git.clone(remote, srcDir)
-                files = await fs.readdir(srcDir)
-            } else {
-                await git.pull()
-            }
-            keepTrying = false
-        } catch(gitErr) {            
-            console.log("Failed to get files from github.")
-            console.error(gitErr)
+const delay = (time) => new Promise((res) => setTimeout(res, time))
+async function loadSrcFiles() {
+  const srcDirExists = await fs.exists(srcDir)
+  if (!srcDirExists) {
+    await fs.mkdir(srcDir)
+  }
+  const git = require('simple-git/promise')(srcDir)
+  let files = await fs.readdir(srcDir)
+  let keepTrying = true
+  let attempt = 1
+  while (keepTrying) {
+    try {
+      if (!files.length) {
+        await git.clone(remote, srcDir)
+        files = await fs.readdir(srcDir)
+      } else {
+        await git.pull()
+      }
+      keepTrying = false
+    } catch (gitErr) {
+      console.log('Failed to get files from github.')
+      console.error(gitErr)
 
-            if(attempt == 5) {
-                console.log("Giving up after 5 attempts.")
-                keepTrying = false
-            } else {
-                attempt++
-                console.log("Will retry in 30 seconds")
-                await delay(30000)
-            }
-        }
+      if (attempt == 5) {
+        console.log('Giving up after 5 attempts.')
+        keepTrying = false
+      } else {
+        attempt++
+        console.log('Will retry in 30 seconds')
+        await delay(30000)
+      }
     }
+  }
 
-    return files
+  return files
 }
 
 const postTemplate = `
