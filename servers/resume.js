@@ -5,6 +5,11 @@ const Koa = require('koa')
 const _ = require('lodash')
 const fs = require('fs-extra')
 const requestHistoryRepo = require('../persistence/client-requests')
+const requestLogging = require('./utils/request-logger')
+
+const port = 7776
+
+runServer()
 
 async function loadResumeDataFromFile() {
   const resumeJSON = await fs.readJson(__dirname + '/../resume/resume.json')
@@ -21,49 +26,44 @@ async function loadResumeDataFromFile() {
   return resume
 }
 
-module.exports = async function createResumeApp() {
-  loadResumeDataFromFile()
-    .then(function (resume) {
-      const app = new Koa()
-      app.use(require('./utils/request-logger'))
-      app.use(serve('dist', {}))
-      app.use(mount('/assets', serve('dist/assets')))
+async function runServer() {
+  console.log('Setting up AWS')
+  await requestLogging.setupAWS()
+  console.log('Retrieving resume data from file')
+  let resume = await loadResumeDataFromFile()
+  const app = new Koa()
+  app.use(requestLogging.logRequest)
+  app.use(serve('dist', {}))
+  app.use(mount('/assets', serve('dist/assets')))
 
-      app.use(async (ctx, next) => {
-        try {
-          await next()
-          if (ctx.path == '/api/profile' && ctx.method == 'GET') {
-            ctx.body = resume
-          } else if (
-            ctx.path == '/api/traffic/monthly' &&
-            ctx.method == 'GET'
-          ) {
-            ctx.body = await getMonthlyTraffic(ctx)
-          } else if (ctx.path == '/api/traffic/daily' && ctx.method == 'GET') {
-            ctx.body = await getDailyTraffic(ctx)
-          } else if (ctx.path == '/api/health' && ctx.method == 'GET') {
-            ctx.body = {
-              healthy: true
-            }
-          } else if (ctx.path.startsWith('/api/')) {
-            ctx.status = 404
-            ctx.body = { code: 404, message: 'Nada' }
-          } else {
-            //console.log(`Serving resume app`)
-            await send(ctx, './dist/index.html')
-          }
-        } catch (err) {
-          console.error(err)
-          ctx.status = 500
-          ctx.body = `500: ${err.toString()}`
+  app.use(async (ctx, next) => {
+    try {
+      await next()
+      if (ctx.path == '/api/profile' && ctx.method == 'GET') {
+        ctx.body = resume
+      } else if (ctx.path == '/api/traffic/monthly' && ctx.method == 'GET') {
+        ctx.body = await getMonthlyTraffic(ctx)
+      } else if (ctx.path == '/api/traffic/daily' && ctx.method == 'GET') {
+        ctx.body = await getDailyTraffic(ctx)
+      } else if (ctx.path == '/api/health' && ctx.method == 'GET') {
+        ctx.body = {
+          healthy: true
         }
-      })
+      } else if (ctx.path.startsWith('/api/')) {
+        ctx.status = 404
+        ctx.body = { code: 404, message: 'Nada' }
+      } else {
+        //console.log(`Serving resume app`)
+        await send(ctx, './dist/index.html')
+      }
+    } catch (err) {
+      console.error(err)
+      ctx.status = 500
+      ctx.body = `500: ${err.toString()}`
+    }
+  })
 
-      return app
-    })
-    .catch(function (err) {
-      console.log('Failed to create resume app', err)
-    })
+  app.listen(port, () => console.log(`Serving on port ${port}`))
 }
 
 async function getMonthlyTraffic(ctx) {

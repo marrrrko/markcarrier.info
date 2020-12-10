@@ -14,28 +14,35 @@ renderer.link = function (href, title, text) {
 marked.setOptions({ renderer: renderer })
 const mustache = require('mustache')
 const sass = require('node-sass')
-
+const requestLogging = require('./utils/request-logger')
 const srcDir = __dirname + '/../writings-src'
 const remote = 'https://github.com/MarkCarrier/public-writings.git'
 const sassSrc = './mini-mark.scss'
+const port = 7775
 
 let css = null
 let postData = null
 
-module.exports = async function createBlogApp() {
+runServer()
+
+async function runServer() {
+  console.log('Setting up AWS')
+  await requestLogging.setupAWS()
+  console.log('Building CSS')
   css = await buildCSS()
+  console.log('Retrieving post data from github')
   postData = await loadPostData()
   setInterval(reloadPosts, 15 * 1000 * 60)
 
   let app = new Koa()
-  app.use(require('./utils/request-logger'))
+  app.use(requestLogging.logRequest)
   app.use(mount('/post/images', serve(srcDir + '/images')))
   app.use(cssAndApiMiddleware)
   app.use(mainContentMiddleware)
-
-  return app
+  app.listen(port, () => {
+    console.log(`Serving on port ${port}`)
+  })
 }
-
 async function cssAndApiMiddleware(ctx, next) {
   if (ctx.path == '/api/health' && ctx.method == 'GET') {
     ctx.body = {
