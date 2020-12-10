@@ -1,14 +1,15 @@
 # markcarrier.info
-My personal resume website. Built to showcase a few technologies and approaches that I favor:
+My personal website. Built to showcase a few technologies and approaches that I favor:
 * node.js
-* koa
 * React
 * Redux
 * Docker Containers
 * GitHub Actions
 * AWS Fargate
+* NoSQL
+* DynamoDB
 
 ### To run locally (linux)
 * Install docker
-* Execute `build-docker-image.sh`
-* Execute `run-docker-image.sh`
+* `./build-docker-image.sh`
+* `./run-docker-image.sh`
