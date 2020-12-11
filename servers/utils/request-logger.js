@@ -11,14 +11,12 @@ async function setupAWS() {
     }
     //console.log(process.env)
     try {
-      if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
-        console.log('Attempting AWS Container Auth')
-        AWS.config.credentials = new AWS.EC2MetadataCredentials({
-          httpOptions: { timeout: 5000 },
-          maxRetries: 10, //
-          retryDelayOptions: { base: 200 }
-        })
-      }
+      console.log('Attempting AWS Container Auth')
+      AWS.config.credentials = new AWS.EC2MetadataCredentials({
+        httpOptions: { timeout: 5000 },
+        maxRetries: 10, //
+        retryDelayOptions: { base: 200 }
+      })
     } catch (awsAuthErr) {
       console.error('Failed to authenticate with AWS', awsAuthErr)
     }
