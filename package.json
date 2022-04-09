@@ -47,7 +47,7 @@
     "koa-static": "^5.0.0",
     "marked": "^0.8.2",
     "mini.css": "^3.0.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mustache": "^4.0.1",
     "node-cache": "^5.1.0",
     "react": "^16.13.1",
